@@ -15,11 +15,30 @@ const app = express();
 
 const PORT = process.env.PORT || 5000;
 
-// Configurar CORS para permitir cookies del frontend
+// Lista de orígenes permitidos
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    process.env.FRONTEND_URL // Para producción (Render, Vercel, etc)
+];
+
 app.use(cors({
-    origin: 'http://localhost:5173', // <--- CAMBIO 3: Especificar URL exacta del frontend
-    credentials: true // <--- CAMBIO 4: Permitir cookies
+    origin: function (origin, callback) {
+        // Permitir peticiones sin origin (Postman, curl, mobile apps)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.indexOf(origin) === -1) {
+            return callback(
+                new Error('La política CORS no permite acceso desde este origen.'),
+                false
+            );
+        }
+
+        return callback(null, true);
+    },
+    credentials: true
 }));
+
 
 app.use(express.json());
 app.use(cookieParser()); // <--- CAMBIO 5: Usar cookie-parser
