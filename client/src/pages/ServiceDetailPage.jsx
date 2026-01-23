@@ -35,7 +35,10 @@ export function ServiceDetailPage() {
 
     if (loading) return <div className="text-center p-20">Cargando...</div>;
     if (!service) return <div className="text-center p-20">No encontrado</div>;
-
+    // FUNCIÓN DE LIMPIEZA: Quita espacios, +, -, ( )
+    const cleanNumber = whatsappNumber
+        ? whatsappNumber.replace(/\D/g, '') // Borra todo lo que NO sea número
+        : "51999999999"; // Número de respaldo si no hay config
     // USAMOS EL NÚMERO DINÁMICO
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hola, me interesa: ${service.title}`)}`;
 

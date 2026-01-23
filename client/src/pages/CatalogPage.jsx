@@ -54,6 +54,8 @@ export function CatalogPage() {
         return () => clearTimeout(timeout);
     }, [search, selectedCategory, priceRange]);
 
+    const cleanNumber = whatsappNumber ? whatsappNumber.replace(/\D/g, '') : "";
+
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 font-display flex flex-col md:flex-row gap-8">
 
@@ -157,7 +159,7 @@ export function CatalogPage() {
                                         <a
                                             href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hola, me interesa: ${service.title}`)}`}
                                             target="_blank"
-                                            rel="noreferrer"
+                                            rel="noopener noreferrer"
                                             className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-600 hover:text-white transition-colors"
                                             title="Cotizar rápido"
                                         >
