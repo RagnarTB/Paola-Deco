@@ -1,52 +1,100 @@
 // client/src/api/services.api.js
 import axios from 'axios';
 
-// Creamos la instancia de axios (le llamaremos 'axiosInstance' para evitar confusiones)
+// Instancia central de Axios
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
-    withCredentials: true // Permite enviar cookies (importante para el login)
+    withCredentials: true
 });
 
-// --- FUNCIONES DE SERVICIOS ---
+/* ======================================================
+   SERVICIOS
+====================================================== */
 
-export const getAllServices = () => {
-    return axiosInstance.get('/services');
+// Obtener servicios con filtros, búsqueda, paginación
+// Ej: getAllServices({ page: 1, search: 'boda', category: 'BODAS' })
+export const getAllServices = (params) => {
+    return axiosInstance.get('/services', { params });
 };
 
+// Obtener un solo servicio
 export const getService = (id) => {
     return axiosInstance.get(`/services/${id}`);
 };
 
+// Crear servicio (con imágenes)
 export const createService = (service) => {
     return axiosInstance.post('/services', service, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
+        headers: { 'Content-Type': 'multipart/form-data' }
     });
 };
 
-// --- FUNCIONES DE AUTENTICACIÓN ---
+// Actualizar servicio (editar datos / activar / desactivar)
+export const updateService = (id, data) => {
+    return axiosInstance.put(`/services/${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+};
 
-// Aquí estaba el error antes: usábamos 'instance' que no existía
-export const registerRequest = (user) => axiosInstance.post(`/auth/register`, user);
+// Eliminar servicio
+export const deleteService = (id) => {
+    return axiosInstance.delete(`/services/${id}`);
+};
 
-export const loginRequest = (user) => axiosInstance.post(`/auth/login`, user);
+/* ======================================================
+   AUTENTICACIÓN
+====================================================== */
 
-export const deleteService = (id) => axiosInstance.delete(`/services/${id}`);
+export const registerRequest = (user) => {
+    return axiosInstance.post('/auth/register', user);
+};
 
-export const logoutRequest = () => axiosInstance.post('/auth/logout');
+export const loginRequest = (user) => {
+    return axiosInstance.post('/auth/login', user);
+};
 
-//--- FUNCIONES DE CATEGORIA ---
+export const logoutRequest = () => {
+    return axiosInstance.post('/auth/logout');
+};
 
-// Categorías
-export const getCategories = () => axiosInstance.get('/categories');
-export const createCategory = (category) => axiosInstance.post('/categories', category);
-export const deleteCategory = (id) => axiosInstance.delete(`/categories/${id}`);
+/* ======================================================
+   CATEGORÍAS
+====================================================== */
 
-// Configuración
-export const getConfig = () => axiosInstance.get('/config');
-export const updateConfig = (data) => axiosInstance.put('/config', data);
+export const getCategories = () => {
+    return axiosInstance.get('/categories');
+};
 
-export const uploadFile = (formData) => axiosInstance.post('/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-});
+export const createCategory = (category) => {
+    return axiosInstance.post('/categories', category);
+};
+
+export const updateCategory = (id, data) => {
+    return axiosInstance.put(`/categories/${id}`, data);
+};
+
+export const deleteCategory = (id) => {
+    return axiosInstance.delete(`/categories/${id}`);
+};
+
+/* ======================================================
+   CONFIGURACIÓN GENERAL
+====================================================== */
+
+export const getConfig = () => {
+    return axiosInstance.get('/config');
+};
+
+export const updateConfig = (data) => {
+    return axiosInstance.put('/config', data);
+};
+
+/* ======================================================
+   SUBIDA DE ARCHIVOS (Cloudinary / Upload)
+====================================================== */
+
+export const uploadFile = (formData) => {
+    return axiosInstance.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+};

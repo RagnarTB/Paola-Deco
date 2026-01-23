@@ -7,20 +7,61 @@ import fs from 'fs-extra';
 
 const router = Router();
 
-// Configuración de Multer (archivos temporales en 'uploads')
+// Multer: archivos temporales en /uploads
 const upload = multer({ dest: 'uploads/' });
 
-// GET: Obtener todos los servicios
+/* ======================================================
+   GET: Servicios con Filtros, Búsqueda y Paginación
+====================================================== */
 router.get('/', async (req, res) => {
     try {
-        const services = await Service.find();
-        res.json(services);
+        // CORRECCIÓN AQUÍ: Agregamos minPrice y maxPrice
+        const { page = 1, limit = 10, search = '', category, isActive, minPrice, maxPrice } = req.query;
+
+        const query = {};
+
+        // Búsqueda por título
+        if (search) {
+            query.title = { $regex: search, $options: 'i' };
+        }
+
+        // Filtro por categoría
+        if (category) query.category = category;
+
+        // Filtro por estado
+        if (isActive !== undefined) {
+            query.isActive = isActive === 'true';
+        }
+
+        // Filtro de Precios
+        if (minPrice || maxPrice) {
+            query.price = {};
+            if (minPrice) query.price.$gte = Number(minPrice);
+            if (maxPrice) query.price.$lte = Number(maxPrice);
+        }
+
+        const services = await Service.find(query)
+            .sort({ createdAt: -1 })
+            .limit(Number(limit))
+            .skip((Number(page) - 1) * Number(limit));
+
+        const total = await Service.countDocuments(query);
+
+        res.json({
+            services,
+            totalPages: Math.ceil(total / limit),
+            currentPage: Number(page),
+            totalServices: total
+        });
     } catch (error) {
+        console.error(error); // Ver error en consola
         res.status(500).json({ message: error.message });
     }
 });
 
-// GET: Obtener un solo servicio por ID
+/* ======================================================
+   GET: Obtener un solo servicio por ID
+====================================================== */
 router.get('/:id', async (req, res) => {
     try {
         const service = await Service.findById(req.params.id);
@@ -31,30 +72,26 @@ router.get('/:id', async (req, res) => {
 
         res.json(service);
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 });
 
-// POST: Crear servicio con MÚLTIPLES IMÁGENES
-// 'upload.array("images", 5)' permite hasta 5 archivos en el campo "images"
+/* ======================================================
+   POST: Crear Servicio con MÚLTIPLES IMÁGENES
+====================================================== */
 router.post('/', upload.array('images', 5), async (req, res) => {
     try {
-        const { title, category, price, description } = req.body;
+        const { title, category, price, description, isActive } = req.body;
         let imageURLs = [];
 
-        // Si hay archivos, los subimos todos a Cloudinary
         if (req.files && req.files.length > 0) {
-            // Subida en paralelo
             const uploadPromises = req.files.map(file => uploadImage(file.path));
             const results = await Promise.all(uploadPromises);
 
-            // Extraemos las URLs seguras
             imageURLs = results.map(result => result.secure_url);
 
-            // Borramos archivos temporales
-            await Promise.all(
-                req.files.map(file => fs.unlink(file.path))
-            );
+            // Limpieza de temporales
+            await Promise.all(req.files.map(file => fs.unlink(file.path)));
         }
 
         const newService = new Service({
@@ -62,25 +99,88 @@ router.post('/', upload.array('images', 5), async (req, res) => {
             category,
             price,
             description,
-            images: imageURLs // Guardamos array de imágenes
+            images: imageURLs,
+            // Convertir a booleano seguro
+            isActive: isActive === 'true' || isActive === true
         });
 
         await newService.save();
         res.json(newService);
+
     } catch (error) {
-        // Limpieza de emergencia si algo falla
         if (req.files) {
-            await Promise.all(
-                req.files.map(file =>
-                    fs.unlink(file.path).catch(e => console.log("Error limpiando archivo:", e))
-                )
-            );
+            await Promise.all(req.files.map(file => fs.unlink(file.path).catch(e => { })));
         }
-        return res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 });
 
-// DELETE: Eliminar servicio por ID
+/* ======================================================
+   PUT: Actualizar Servicio (Editar + Estado + Imágenes)
+====================================================== */
+router.put('/:id', upload.array('images', 5), async (req, res) => {
+    try {
+        // Nota: 'existingImages' viene del frontend con las fotos que NO borraste
+        const { title, category, price, description, isActive, existingImages } = req.body;
+
+        let updateData = { title, category, price, description };
+
+        // Actualizar estado si viene
+        if (isActive !== undefined) {
+            updateData.isActive = isActive === 'true' || isActive === true;
+        }
+
+        // --- LÓGICA DE IMÁGENES MEJORADA ---
+
+        // 1. Recuperamos las imágenes antiguas que el usuario decidió mantener
+        // (Si el frontend manda solo una string, la convertimos a array)
+        let finalImages = existingImages
+            ? (Array.isArray(existingImages) ? existingImages : [existingImages])
+            : [];
+
+        // 2. Subimos las NUEVAS imágenes (si hay)
+        if (req.files && req.files.length > 0) {
+            const uploadPromises = req.files.map(file => uploadImage(file.path));
+            const results = await Promise.all(uploadPromises);
+            const newImageURLs = results.map(result => result.secure_url);
+
+            // Sumamos las nuevas a las existentes
+            finalImages = [...finalImages, ...newImageURLs];
+
+            // Limpieza
+            await Promise.all(req.files.map(file => fs.unlink(file.path)));
+        }
+
+        // Solo actualizamos el campo images si tenemos un array final válido
+        // Ojo: Si finalImages está vacío, significa que el usuario borró TODAS las fotos
+        // Si no enviamos nada de images/existingImages, asumimos que no se tocó esa parte
+        if (req.files.length > 0 || existingImages) {
+            updateData.images = finalImages;
+        }
+
+        const updatedService = await Service.findByIdAndUpdate(
+            req.params.id,
+            updateData,
+            { new: true }
+        );
+
+        if (!updatedService) {
+            return res.status(404).json({ message: 'Servicio no encontrado' });
+        }
+
+        res.json(updatedService);
+
+    } catch (error) {
+        if (req.files) {
+            await Promise.all(req.files.map(file => fs.unlink(file.path).catch(e => { })));
+        }
+        res.status(500).json({ message: error.message });
+    }
+});
+
+/* ======================================================
+   DELETE: Eliminar Servicio
+====================================================== */
 router.delete('/:id', async (req, res) => {
     try {
         const serviceDeleted = await Service.findByIdAndDelete(req.params.id);
@@ -88,14 +188,9 @@ router.delete('/:id', async (req, res) => {
         if (!serviceDeleted) {
             return res.status(404).json({ message: 'Servicio no encontrado' });
         }
-
-        // OPCIONAL: Aquí puedes borrar imágenes de Cloudinary si guardas public_id
-        // import { deleteImage } from '../libs/cloudinary.js';
-        // for (const img of serviceDeleted.images) { await deleteImage(public_id) }
-
-        return res.sendStatus(204);
+        res.sendStatus(204);
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 });
 

@@ -1,94 +1,151 @@
-// client/src/pages/CatalogPage.jsx
 import { useEffect, useState } from 'react';
-import { getAllServices } from '../api/services.api';
+import { getAllServices, getCategories } from '../api/services.api';
 import { Link } from 'react-router-dom';
 
 export function CatalogPage() {
     const [services, setServices] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Estados de Filtros
+    const [search, setSearch] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+
+    // Cargar categorías al inicio
     useEffect(() => {
-        async function loadServices() {
-            try {
-                const res = await getAllServices();
-                console.log("Datos recibidos:", res.data);
-                setServices(res.data);
-                setLoading(false);
-            } catch (error) {
-                console.error("Error cargando servicios:", error);
-                setLoading(false);
-            }
-        }
-        loadServices();
+        getCategories().then(res => setCategories(res.data.filter(c => c.isActive)));
     }, []);
 
-    if (loading) return <div className="text-center p-10">Cargando catálogo...</div>;
+    // Cargar servicios cuando cambian los filtros
+    useEffect(() => {
+        const fetchServices = async () => {
+            setLoading(true);
+            try {
+                const res = await getAllServices({
+                    search,
+                    category: selectedCategory,
+                    minPrice: priceRange.min,
+                    maxPrice: priceRange.max,
+                    isActive: true // Solo activos
+                });
+                setServices(res.data.services);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        // Debounce para no llamar a la API en cada tecla
+        const timeout = setTimeout(fetchServices, 400);
+        return () => clearTimeout(timeout);
+
+    }, [search, selectedCategory, priceRange]);
 
     return (
-        <div className="max-w-6xl mx-auto p-4">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-primary">Nuestros Servicios</h1>
+        <div className="max-w-7xl mx-auto px-4 py-8 font-display flex flex-col md:flex-row gap-8">
 
-                <Link
-                    to="/admin/crear"
-                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold shadow-md transition-colors"
-                >
-                    + Nuevo Servicio
-                </Link>
+            {/* --- SIDEBAR FILTROS --- */}
+            <aside className="w-full md:w-64 flex-shrink-0 space-y-8">
+                <div>
+                    <h3 className="font-bold text-gray-800 mb-4">Buscar</h3>
+                    <div className="relative">
+                        <span className="material-symbols-outlined absolute left-3 top-2.5 text-gray-400 text-lg">search</span>
+                        <input
+                            type="text"
+                            placeholder="Ej: Boda Vintage..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            className="w-full pl-10 p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary text-sm"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <h3 className="font-bold text-gray-800 mb-4">Categorías</h3>
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="cat"
+                                checked={selectedCategory === ""}
+                                onChange={() => setSelectedCategory("")}
+                                className="text-primary focus:ring-primary"
+                            />
+                            <span className="text-sm text-gray-600">Todas</span>
+                        </label>
+                        {categories.map(cat => (
+                            <label key={cat._id} className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="cat"
+                                    checked={selectedCategory === cat.name}
+                                    onChange={() => setSelectedCategory(cat.name)}
+                                    className="text-primary focus:ring-primary"
+                                />
+                                <span className="text-sm text-gray-600">{cat.name}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
+
+                <div>
+                    <h3 className="font-bold text-gray-800 mb-4">Precio (S/)</h3>
+                    <div className="flex gap-2">
+                        <input
+                            type="number" placeholder="Min"
+                            value={priceRange.min}
+                            onChange={e => setPriceRange({ ...priceRange, min: e.target.value })}
+                            className="w-full p-2 border border-gray-200 rounded-lg text-sm"
+                        />
+                        <input
+                            type="number" placeholder="Max"
+                            value={priceRange.max}
+                            onChange={e => setPriceRange({ ...priceRange, max: e.target.value })}
+                            className="w-full p-2 border border-gray-200 rounded-lg text-sm"
+                        />
+                    </div>
+                </div>
+            </aside>
+
+            {/* --- GRID DE RESULTADOS --- */}
+            <div className="flex-1">
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-gray-800">Catálogo de Servicios</h1>
+                    <p className="text-sm text-gray-500">{services.length} resultados encontrados</p>
+                </div>
+
+                {loading ? (
+                    <div className="text-center py-20">Cargando...</div>
+                ) : services.length === 0 ? (
+                    <div className="text-center py-20 bg-gray-50 rounded-xl">
+                        <span className="material-symbols-outlined text-4xl text-gray-300 mb-2">search_off</span>
+                        <p className="text-gray-500">No encontramos resultados con esos filtros.</p>
+                        <button onClick={() => { setSearch(""); setSelectedCategory(""); setPriceRange({ min: "", max: "" }) }} className="text-primary font-bold text-sm mt-2 hover:underline">Limpiar filtros</button>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {services.map(service => (
+                            <Link to={`/servicio/${service._id}`} key={service._id} className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+                                <div className="h-48 overflow-hidden relative">
+                                    <img
+                                        src={service.images[0] || 'placeholder.jpg'}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold uppercase">
+                                        {service.category}
+                                    </div>
+                                </div>
+                                <div className="p-4">
+                                    <h3 className="font-bold text-gray-800 mb-1 truncate">{service.title}</h3>
+                                    <p className="text-primary font-bold">S/ {service.price}</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
             </div>
-
-            {services.length === 0 ? (
-                <div className="text-center py-20 bg-gray-50 rounded-lg">
-                    <p className="text-gray-500 text-lg">Aún no hay servicios registrados.</p>
-                    <p className="text-sm text-gray-400 mt-2">¡Ve al panel de admin para agregar uno!</p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {services.map(service => (
-                        <Link
-                            to={`/servicio/${service._id}`}
-                            key={service._id}
-                            className="block group"
-                        >
-                            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full flex flex-col">
-
-                                {/* Imagen con efecto Zoom */}
-                                <div className="relative overflow-hidden h-48">
-                                    {service.images && service.images.length > 0 ? (
-                                        <img
-                                            src={service.images[0]}
-                                            alt={service.title}
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
-                                            Sin foto
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="p-4 flex flex-col flex-grow">
-                                    <h2 className="font-bold text-xl mb-1 text-gray-800 group-hover:text-primary transition-colors">
-                                        {service.title}
-                                    </h2>
-
-                                    <p className="text-primary font-bold text-lg mb-2">
-                                        S/ {service.price}
-                                    </p>
-
-                                    <p className="text-gray-500 text-sm line-clamp-2 mb-4 flex-grow">
-                                        {service.description}
-                                    </p>
-
-                                    <span className="text-center w-full py-2 rounded-lg bg-gray-50 text-gray-600 text-sm font-bold group-hover:bg-primary group-hover:text-white transition-colors">
-                                        Ver Detalle
-                                    </span>
-                                </div>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
-            )}
         </div>
     );
 }

@@ -30,6 +30,10 @@ const serviceSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isActive: {
+        type: Boolean,
+        default: true // Por defecto visible
+    },
 }, {
     timestamps: true // Esto crea automáticamente campos "createdAt" y "updatedAt"
 });

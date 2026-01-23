@@ -7,6 +7,11 @@ const slideSchema = new mongoose.Schema({
     buttonText: String,
     link: String
 });
+const featureSchema = new mongoose.Schema({
+    icon: String, // Nombre del icono de Google Fonts
+    title: String,
+    description: String
+});
 
 const configSchema = new mongoose.Schema({
     // Identidad
@@ -22,7 +27,11 @@ const configSchema = new mongoose.Schema({
     instagramUrl: String,
 
     // Carrusel del Home (Array de slides)
-    heroSlides: [slideSchema]
+    heroSlides: [slideSchema],
+    tiktokVideos: [{
+        url: String, // URL del video (ej: https://www.tiktok.com/@usuario/video/123456)
+        embedId: String // ID extraído para el embed
+    }], features: [featureSchema]
 }, { timestamps: true });
 
 export default mongoose.model('Config', configSchema);

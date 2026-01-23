@@ -13,11 +13,15 @@ import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { CategoriesPage } from './pages/CategoriesPage'; // <--- IMPORTAR
 import { AdminConfigPage } from './pages/AdminConfigPage'; // <--- IMPORTAR
 import { AdminLayout } from './layouts/AdminLayout';
+
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <div className="min-h-screen bg-background-light font-display">
+          <Toaster position="top-center" reverseOrder={false} />
           <Routes>
 
             {/* --- ZONA PÚBLICA (Con Navbar y Footer) --- */}

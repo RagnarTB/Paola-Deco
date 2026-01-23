@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getConfig, updateConfig, uploadFile } from '../api/services.api';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 export function AdminConfigPage() {
     const [loading, setLoading] = useState(false);
@@ -13,7 +14,9 @@ export function AdminConfigPage() {
         address: '',
         facebookUrl: '',
         instagramUrl: '',
-        heroSlides: []
+        heroSlides: [],
+        tiktokVideos: [],   // NUEVO
+        features: []        // NUEVO
     });
 
     // Cargar datos iniciales
@@ -29,7 +32,9 @@ export function AdminConfigPage() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // --- SLIDES ---
+    // =====================================================
+    // SLIDES
+    // =====================================================
 
     const addSlide = () => {
         setFormData({
@@ -53,7 +58,6 @@ export function AdminConfigPage() {
         setFormData({ ...formData, heroSlides: newSlides });
     };
 
-    // --- SUBIDA DE IMAGEN POR SLIDE ---
     const handleImageUpload = async (e, index) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -64,22 +68,86 @@ export function AdminConfigPage() {
         try {
             const res = await uploadFile(data);
             handleSlideChange(index, 'imageUrl', res.data.url);
+            toast.success("Imagen subida");
         } catch (error) {
             console.error(error);
-            alert("Error al subir imagen");
+            toast.error("Error al subir imagen");
         }
     };
 
-    // Guardar configuración
+    // =====================================================
+    // TIKTOK
+    // =====================================================
+
+    const addTikTok = () => {
+        if (formData.tiktokVideos.length >= 5) {
+            return toast.error("Máximo 5 videos");
+        }
+
+        setFormData({
+            ...formData,
+            tiktokVideos: [
+                ...formData.tiktokVideos,
+                { url: '', embedId: '' }
+            ]
+        });
+    };
+
+    const updateTikTok = (index, url) => {
+        const newVideos = [...formData.tiktokVideos];
+        newVideos[index].url = url;
+
+        // Extraer ID del link
+        const regex = /\/video\/(\d+)/;
+        const match = url.match(regex);
+        newVideos[index].embedId = match ? match[1] : '';
+
+        setFormData({ ...formData, tiktokVideos: newVideos });
+    };
+
+    const removeTikTok = (index) => {
+        const newVideos = formData.tiktokVideos.filter((_, i) => i !== index);
+        setFormData({ ...formData, tiktokVideos: newVideos });
+    };
+
+    // =====================================================
+    // FEATURES
+    // =====================================================
+
+    const addFeature = () => {
+        setFormData({
+            ...formData,
+            features: [
+                ...formData.features,
+                { icon: 'star', title: '', description: '' }
+            ]
+        });
+    };
+
+    const updateFeature = (index, field, val) => {
+        const newFeats = [...formData.features];
+        newFeats[index][field] = val;
+        setFormData({ ...formData, features: newFeats });
+    };
+
+    const removeFeature = (index) => {
+        const newFeats = formData.features.filter((_, i) => i !== index);
+        setFormData({ ...formData, features: newFeats });
+    };
+
+    // =====================================================
+    // GUARDAR
+    // =====================================================
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
             await updateConfig(formData);
-            alert('Configuración guardada exitosamente');
+            toast.success('Configuración guardada');
         } catch (error) {
             console.error(error);
-            alert('Error al guardar');
+            toast.error('Error al guardar');
         } finally {
             setLoading(false);
         }
@@ -96,7 +164,9 @@ export function AdminConfigPage() {
 
             <form onSubmit={handleSubmit} className="space-y-8">
 
-                {/* SECCIÓN 1: INFO GENERAL */}
+                {/* ===================================================== */}
+                {/* INFO GENERAL */}
+                {/* ===================================================== */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">
                         Información General
@@ -124,13 +194,12 @@ export function AdminConfigPage() {
                                 value={formData.whatsapp}
                                 onChange={handleChange}
                                 className="w-full p-2 border rounded-lg"
-                                placeholder="51987654321"
                             />
                         </div>
 
                         <div>
                             <label className="block text-sm font-bold text-gray-700">
-                                Email Contacto
+                                Email
                             </label>
                             <input
                                 name="email"
@@ -142,7 +211,7 @@ export function AdminConfigPage() {
 
                         <div>
                             <label className="block text-sm font-bold text-gray-700">
-                                Link Facebook
+                                Facebook
                             </label>
                             <input
                                 name="facebookUrl"
@@ -154,7 +223,9 @@ export function AdminConfigPage() {
                     </div>
                 </div>
 
-                {/* SECCIÓN 2: SLIDES */}
+                {/* ===================================================== */}
+                {/* SLIDES */}
+                {/* ===================================================== */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <div className="flex justify-between items-center mb-4 border-b pb-2">
                         <h3 className="text-lg font-bold text-gray-800">
@@ -174,7 +245,7 @@ export function AdminConfigPage() {
                         {formData.heroSlides.map((slide, index) => (
                             <div
                                 key={index}
-                                className="bg-gray-50 p-4 rounded-lg border border-gray-200 relative group"
+                                className="bg-gray-50 p-4 rounded-lg border border-gray-200 relative"
                             >
                                 <button
                                     type="button"
@@ -199,7 +270,6 @@ export function AdminConfigPage() {
                                         />
                                     </div>
 
-                                    {/* SUBIDA DE IMAGEN */}
                                     <div>
                                         <label className="text-xs font-bold text-gray-500 mb-1 block">
                                             Imagen de Fondo
@@ -221,19 +291,15 @@ export function AdminConfigPage() {
 
                                             <input
                                                 value={slide.imageUrl}
-                                                onChange={(e) =>
-                                                    handleSlideChange(index, 'imageUrl', e.target.value)
-                                                }
-                                                className="flex-1 p-2 border rounded text-xs text-gray-500"
-                                                placeholder="URL generada automáticamente"
                                                 readOnly
+                                                className="flex-1 p-2 border rounded text-xs text-gray-500"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="md:col-span-2">
                                         <label className="text-xs font-bold text-gray-500">
-                                            Subtítulo / Descripción
+                                            Subtítulo
                                         </label>
                                         <input
                                             value={slide.subtitle}
@@ -245,7 +311,6 @@ export function AdminConfigPage() {
                                     </div>
                                 </div>
 
-                                {/* Previsualización */}
                                 {slide.imageUrl && (
                                     <img
                                         src={slide.imageUrl}
@@ -253,6 +318,110 @@ export function AdminConfigPage() {
                                         alt="preview"
                                     />
                                 )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ===================================================== */}
+                {/* TIKTOK */}
+                {/* ===================================================== */}
+                <div className="bg-white p-6 rounded-xl border border-gray-200">
+                    <div className="flex justify-between items-center mb-4 border-b pb-2">
+                        <h3 className="font-bold">Videos Destacados (TikTok)</h3>
+                        <button
+                            type="button"
+                            onClick={addTikTok}
+                            className="text-sm bg-black text-white px-3 py-1 rounded font-bold"
+                        >
+                            + Video
+                        </button>
+                    </div>
+
+                    <div className="space-y-4">
+                        {formData.tiktokVideos.map((video, idx) => (
+                            <div key={idx} className="flex gap-2 items-center">
+                                <span className="font-bold text-gray-400">
+                                    #{idx + 1}
+                                </span>
+
+                                <input
+                                    value={video.url}
+                                    onChange={(e) => updateTikTok(idx, e.target.value)}
+                                    placeholder="Pega el link de TikTok aquí..."
+                                    className="flex-1 p-2 border rounded"
+                                />
+
+                                <button
+                                    type="button"
+                                    onClick={() => removeTikTok(idx)}
+                                    className="text-red-500 font-bold"
+                                >
+                                    X
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ===================================================== */}
+                {/* FEATURES */}
+                {/* ===================================================== */}
+                <div className="bg-white p-6 rounded-xl border border-gray-200">
+                    <div className="flex justify-between items-center mb-4 border-b pb-2">
+                        <h3 className="font-bold">¿Por qué elegirnos?</h3>
+                        <button
+                            type="button"
+                            onClick={addFeature}
+                            className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded font-bold"
+                        >
+                            + Característica
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {formData.features.map((feat, idx) => (
+                            <div key={idx} className="bg-gray-50 p-4 rounded border relative">
+                                <button
+                                    type="button"
+                                    onClick={() => removeFeature(idx)}
+                                    className="absolute top-2 right-2 text-red-500 font-bold text-xs"
+                                >
+                                    X
+                                </button>
+
+                                <div className="space-y-2">
+                                    <div className="flex gap-2">
+                                        <input
+                                            value={feat.icon}
+                                            onChange={e => updateFeature(idx, 'icon', e.target.value)}
+                                            placeholder="Icono (ej: star)"
+                                            className="w-1/3 p-1 border text-xs"
+                                        />
+                                        <a
+                                            href="https://fonts.google.com/icons"
+                                            target="_blank"
+                                            className="text-[10px] text-blue-500 underline flex items-center"
+                                        >
+                                            Ver Iconos
+                                        </a>
+                                    </div>
+
+                                    <input
+                                        value={feat.title}
+                                        onChange={e => updateFeature(idx, 'title', e.target.value)}
+                                        placeholder="Título"
+                                        className="w-full p-1 border font-bold"
+                                    />
+
+                                    <textarea
+                                        value={feat.description}
+                                        onChange={e => updateFeature(idx, 'description', e.target.value)}
+                                        placeholder="Descripción breve"
+                                        className="w-full p-1 border text-sm"
+                                        rows="2"
+                                    />
+                                </div>
                             </div>
                         ))}
                     </div>
