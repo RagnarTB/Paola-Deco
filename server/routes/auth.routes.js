@@ -4,7 +4,8 @@ import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import { createAccessToken } from '../libs/jwt.js';
 import jwt from 'jsonwebtoken';
-import { TOKEN_SECRET } from '../libs/jwt.js';
+
+export const TOKEN_SECRET = process.env.TOKEN_SECRET || "PaolaDecoSecretKey2026";
 
 const router = Router();
 
@@ -31,9 +32,10 @@ router.post('/register', async (req, res) => {
 
         // 5. Enviar token en una cookie
         res.cookie('token', token, {
-            // Opciones de seguridad (httpOnly evita que JS lea la cookie)
-            // secure: true, // Descomentar en producción (https)
-            // sameSite: 'none', // Descomentar en producción
+            httpOnly: true, // Evita que JS lea la cookie (seguridad XSS)
+            secure: process.env.NODE_ENV === 'production', // Solo HTTPS en producción
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' para cross-origin en producción
+            maxAge: 24 * 60 * 60 * 1000 // 24 horas
         });
 
         res.json({
@@ -68,7 +70,12 @@ router.post('/login', async (req, res) => {
         const token = await createAccessToken({ id: userFound._id });
 
         // 4. Enviar cookie
-        res.cookie('token', token);
+        res.cookie('token', token, {
+            httpOnly: true, // Evita que JS lea la cookie (seguridad XSS)
+            secure: process.env.NODE_ENV === 'production', // Solo HTTPS en producción
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' para cross-origin en producción
+            maxAge: 24 * 60 * 60 * 1000 // 24 horas
+        });
 
         res.json({
             id: userFound._id,
@@ -85,6 +92,9 @@ router.post('/login', async (req, res) => {
 // LOGOUT: Salir
 router.post('/logout', (req, res) => {
     res.cookie('token', "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         expires: new Date(0)
     });
     return res.sendStatus(200);
