@@ -1,23 +1,36 @@
 import { useEffect, useState } from 'react';
-import { getAllServices, getCategories } from '../api/services.api';
+import { getAllServices, getCategories, getConfig } from '../api/services.api'; // <--- Importamos getConfig
 import { Link } from 'react-router-dom';
 
 export function CatalogPage() {
     const [services, setServices] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [whatsappNumber, setWhatsappNumber] = useState(""); // <--- Estado número
 
-    // Estados de Filtros
+    // Filtros
     const [search, setSearch] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [priceRange, setPriceRange] = useState({ min: "", max: "" });
 
-    // Cargar categorías al inicio
+    // Cargar Datos Iniciales (Categorías y Configuración)
     useEffect(() => {
-        getCategories().then(res => setCategories(res.data.filter(c => c.isActive)));
+        async function loadInitialData() {
+            try {
+                const [catsRes, configRes] = await Promise.all([
+                    getCategories(),
+                    getConfig()
+                ]);
+                setCategories(catsRes.data.filter(c => c.isActive));
+                setWhatsappNumber(configRes.data.whatsapp || ""); // Guardamos número
+            } catch (error) {
+                console.error("Error cargando datos iniciales", error);
+            }
+        }
+        loadInitialData();
     }, []);
 
-    // Cargar servicios cuando cambian los filtros
+    // Cargar Servicios (Filtros)
     useEffect(() => {
         const fetchServices = async () => {
             setLoading(true);
@@ -27,7 +40,7 @@ export function CatalogPage() {
                     category: selectedCategory,
                     minPrice: priceRange.min,
                     maxPrice: priceRange.max,
-                    isActive: true // Solo activos
+                    isActive: true
                 });
                 setServices(res.data.services);
             } catch (error) {
@@ -37,10 +50,8 @@ export function CatalogPage() {
             }
         };
 
-        // Debounce para no llamar a la API en cada tecla
         const timeout = setTimeout(fetchServices, 400);
         return () => clearTimeout(timeout);
-
     }, [search, selectedCategory, priceRange]);
 
     return (
@@ -67,8 +78,7 @@ export function CatalogPage() {
                     <div className="space-y-2">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
-                                type="radio"
-                                name="cat"
+                                type="radio" name="cat"
                                 checked={selectedCategory === ""}
                                 onChange={() => setSelectedCategory("")}
                                 className="text-primary focus:ring-primary"
@@ -78,8 +88,7 @@ export function CatalogPage() {
                         {categories.map(cat => (
                             <label key={cat._id} className="flex items-center gap-2 cursor-pointer">
                                 <input
-                                    type="radio"
-                                    name="cat"
+                                    type="radio" name="cat"
                                     checked={selectedCategory === cat.name}
                                     onChange={() => setSelectedCategory(cat.name)}
                                     className="text-primary focus:ring-primary"
@@ -127,8 +136,8 @@ export function CatalogPage() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {services.map(service => (
-                            <Link to={`/servicio/${service._id}`} key={service._id} className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
-                                <div className="h-48 overflow-hidden relative">
+                            <div key={service._id} className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
+                                <Link to={`/servicio/${service._id}`} className="block h-48 overflow-hidden relative">
                                     <img
                                         src={service.images[0] || 'placeholder.jpg'}
                                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -136,12 +145,27 @@ export function CatalogPage() {
                                     <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold uppercase">
                                         {service.category}
                                     </div>
+                                </Link>
+                                <div className="p-4 flex-1 flex flex-col">
+                                    <Link to={`/servicio/${service._id}`}>
+                                        <h3 className="font-bold text-gray-800 mb-1 truncate hover:text-primary transition-colors">{service.title}</h3>
+                                    </Link>
+                                    <div className="flex justify-between items-center mt-auto pt-2">
+                                        <p className="text-primary font-bold">S/ {service.price}</p>
+
+                                        {/* BOTÓN WHATSAPP EN CATALOGO */}
+                                        <a
+                                            href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hola, me interesa: ${service.title}`)}`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-600 hover:text-white transition-colors"
+                                            title="Cotizar rápido"
+                                        >
+                                            <span className="material-symbols-outlined text-[20px] block">chat</span>
+                                        </a>
+                                    </div>
                                 </div>
-                                <div className="p-4">
-                                    <h3 className="font-bold text-gray-800 mb-1 truncate">{service.title}</h3>
-                                    <p className="text-primary font-bold">S/ {service.price}</p>
-                                </div>
-                            </Link>
+                            </div>
                         ))}
                     </div>
                 )}

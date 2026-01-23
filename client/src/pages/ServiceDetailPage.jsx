@@ -1,21 +1,28 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getService } from '../api/services.api';
+import { getService, getConfig } from '../api/services.api'; // <--- IMPORTAMOS getConfig
 
 export function ServiceDetailPage() {
     const { id } = useParams();
     const [service, setService] = useState(null);
-    const [activeImage, setActiveImage] = useState(null); // Estado para la foto grande
+    const [activeImage, setActiveImage] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [whatsappNumber, setWhatsappNumber] = useState(""); // <--- Estado para el número
 
     useEffect(() => {
-        async function loadService() {
+        async function loadData() {
             try {
-                const res = await getService(id);
-                setService(res.data);
-                // Si hay imágenes, ponemos la primera como activa por defecto
-                if (res.data.images && res.data.images.length > 0) {
-                    setActiveImage(res.data.images[0]);
+                // Cargamos Servicio y Configuración en paralelo
+                const [serviceRes, configRes] = await Promise.all([
+                    getService(id),
+                    getConfig()
+                ]);
+
+                setService(serviceRes.data);
+                setWhatsappNumber(configRes.data.whatsapp || ""); // Guardamos el número
+
+                if (serviceRes.data.images && serviceRes.data.images.length > 0) {
+                    setActiveImage(serviceRes.data.images[0]);
                 }
                 setLoading(false);
             } catch (error) {
@@ -23,13 +30,14 @@ export function ServiceDetailPage() {
                 setLoading(false);
             }
         }
-        loadService();
+        loadData();
     }, [id]);
 
     if (loading) return <div className="text-center p-20">Cargando...</div>;
     if (!service) return <div className="text-center p-20">No encontrado</div>;
 
-    const whatsappUrl = `https://wa.me/51987654321?text=${encodeURIComponent(`Hola, me interesa: ${service.title}`)}`;
+    // USAMOS EL NÚMERO DINÁMICO
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hola, me interesa: ${service.title}`)}`;
 
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-10 font-display">
@@ -39,9 +47,8 @@ export function ServiceDetailPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
 
-                {/* --- GALERÍA DE IMÁGENES --- */}
+                {/* --- GALERÍA --- */}
                 <div className="flex flex-col gap-4">
-                    {/* Imagen Principal Grande */}
                     <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm relative group">
                         {activeImage ? (
                             <img src={activeImage} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -50,7 +57,6 @@ export function ServiceDetailPage() {
                         )}
                     </div>
 
-                    {/* Tira de Miniaturas */}
                     {service.images && service.images.length > 1 && (
                         <div className="flex gap-3 overflow-x-auto pb-2">
                             {service.images.map((img, index) => (
@@ -66,7 +72,7 @@ export function ServiceDetailPage() {
                     )}
                 </div>
 
-                {/* --- INFO DEL SERVICIO --- */}
+                {/* --- INFO --- */}
                 <div className="flex flex-col justify-center">
                     <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold w-fit mb-4 uppercase tracking-wider">
                         {service.category}
@@ -93,9 +99,11 @@ export function ServiceDetailPage() {
                         </div>
                     </div>
 
+                    {/* Botón WhatsApp Dinámico */}
                     <a
                         href={whatsappUrl}
                         target="_blank"
+                        rel="noreferrer"
                         className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-4 px-6 rounded-xl font-bold text-center flex items-center justify-center gap-3 transition-all hover:shadow-lg hover:shadow-green-200 transform hover:-translate-y-1"
                     >
                         <span className="material-symbols-outlined">chat</span>

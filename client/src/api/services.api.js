@@ -57,6 +57,9 @@ export const logoutRequest = () => {
     return axiosInstance.post('/auth/logout');
 };
 
+export const verifyTokenRequest = () => {
+    return axiosInstance.get('/auth/verify');
+};
 /* ======================================================
    CATEGORÍAS
 ====================================================== */
