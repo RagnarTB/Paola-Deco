@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos base para el body */
+body {
+  @apply bg-background-light text-gray-900 font-display transition-colors duration-300;
+}
