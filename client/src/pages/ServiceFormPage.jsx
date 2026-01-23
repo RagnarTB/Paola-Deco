@@ -1,111 +1,218 @@
-// client/src/pages/ServiceFormPage.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createService } from '../api/services.api';
+import { createService, getCategories } from '../api/services.api';
 
 export function ServiceFormPage() {
-    const navigate = useNavigate(); // Para redirigir al usuario después de guardar
+    const navigate = useNavigate();
 
-    // Estado para guardar los datos del formulario
-    const [formData, setFormData] = useState({
-        title: '',
-        category: 'Bodas', // Valor por defecto
-        price: '',
-        description: ''
-    });
+    const [title, setTitle] = useState('');
+    const [category, setCategory] = useState('');
+    const [price, setPrice] = useState('');
+    const [description, setDescription] = useState('');
 
-    // Función que se ejecuta cuando escribes en los inputs
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+    // CATEGORÍAS DINÁMICAS
+    const [categoriesList, setCategoriesList] = useState([]);
+
+    // ESTADO DE IMÁGENES
+    const [files, setFiles] = useState([]);
+    const [previews, setPreviews] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    // 1. CARGAR CATEGORÍAS AL INICIO
+    useEffect(() => {
+        async function loadCats() {
+            try {
+                const res = await getCategories();
+                setCategoriesList(res.data);
+
+                // Si hay categorías, usar la primera como default
+                if (res.data.length > 0) {
+                    setCategory(res.data[0].name);
+                }
+            } catch (error) {
+                console.error('Error cargando categorías', error);
+            }
+        }
+
+        loadCats();
+    }, []);
+
+    // 2. AGREGAR IMÁGENES (ACUMULATIVO + LÍMITE 5)
+    const handleFileChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+
+        if (files.length + selectedFiles.length > 5) {
+            return alert("Solo puedes subir un máximo de 5 fotos por servicio");
+        }
+
+        setFiles(prev => [...prev, ...selectedFiles]);
+
+        const newPreviews = selectedFiles.map(file => URL.createObjectURL(file));
+        setPreviews(prev => [...prev, ...newPreviews]);
     };
 
-    // Función que se ejecuta al enviar el formulario
-    const handleSubmit = async (e) => {
-        e.preventDefault(); // Evita que la página se recargue
-        try {
-            // 1. Enviamos los datos al backend
-            await createService(formData);
+    // 3. QUITAR UNA IMAGEN
+    const removeImage = (index) => {
+        setFiles(prev => prev.filter((_, i) => i !== index));
+        setPreviews(prev => prev.filter((_, i) => i !== index));
+    };
 
-            // 2. Si todo sale bien, avisamos y redirigimos al catálogo
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('category', category);
+            formData.append('price', price);
+            formData.append('description', description);
+
+            for (let i = 0; i < files.length; i++) {
+                formData.append('images', files[i]);
+            }
+
+            await createService(formData);
             alert('¡Servicio creado exitosamente!');
-            navigate('/catalogo');
+            navigate('/admin');
         } catch (error) {
             console.error(error);
             alert('Error al crear el servicio');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="max-w-md mx-auto mt-10 bg-white p-8 border border-gray-200 rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold text-primary mb-6 text-center">Nuevo Servicio</h2>
+        <div className="max-w-2xl mx-auto mt-10 bg-white p-8 border border-gray-200 rounded-xl shadow-lg font-display">
+            <h2 className="text-2xl font-bold text-primary mb-6 text-center">
+                Nuevo Servicio
+            </h2>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
-                {/* Título */}
-                <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Título</label>
-                    <input
-                        type="text"
-                        name="title"
-                        onChange={handleChange}
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
-                        placeholder="Ej: Decoración Boda Vintage"
-                        required
-                    />
+                {/* Zona de Carga de Imágenes */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-bold text-gray-700">
+                        Fotos del Servicio (Máx 5)
+                    </label>
+
+                    <div className="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-300 text-center hover:bg-gray-100 transition-colors relative">
+                        <input
+                            type="file"
+                            multiple
+                            onChange={handleFileChange}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            accept="image/*"
+                        />
+                        <div className="flex flex-col items-center gap-2 text-gray-400">
+                            <span className="material-symbols-outlined text-4xl">
+                                add_photo_alternate
+                            </span>
+                            <span className="text-sm font-medium">
+                                Arrastra tus fotos aquí o haz clic
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Previsualización con borrar */}
+                    {previews.length > 0 && (
+                        <div className="flex gap-4 overflow-x-auto py-4">
+                            {previews.map((src, index) => (
+                                <div
+                                    key={index}
+                                    className="relative size-24 min-w-24 rounded-xl overflow-hidden border border-gray-200 shadow-sm group"
+                                >
+                                    <img
+                                        src={src}
+                                        className="w-full h-full object-cover"
+                                        alt={`preview-${index}`}
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => removeImage(index)}
+                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                                    >
+                                        <span className="material-symbols-outlined text-[16px] block">
+                                            close
+                                        </span>
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                {/* Categoría */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-1">
+                            Título
+                        </label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-lg"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-1">
+                            Precio Base (S/)
+                        </label>
+                        <input
+                            type="number"
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-lg"
+                            required
+                        />
+                    </div>
+                </div>
+
+                {/* SELECT DINÁMICO DE CATEGORÍAS */}
                 <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">
+                        Categoría
+                    </label>
                     <select
-                        name="category"
-                        onChange={handleChange}
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-lg"
                     >
-                        <option value="Bodas">Bodas</option>
-                        <option value="Infantiles">Infantiles</option>
-                        <option value="Baby Shower">Baby Shower</option>
-                        <option value="Corporativo">Corporativo</option>
-                        <option value="Quinceañeros">Quinceañeros</option>
+                        {categoriesList.map(cat => (
+                            <option key={cat._id} value={cat.name}>
+                                {cat.name}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
-                {/* Precio */}
                 <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Precio Base (S/)</label>
-                    <input
-                        type="number"
-                        name="price"
-                        onChange={handleChange}
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
-                        placeholder="1500"
+                    <label className="block text-sm font-bold text-gray-700 mb-1">
+                        Descripción
+                    </label>
+                    <textarea
+                        rows="4"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-lg"
                         required
                     />
-                </div>
-
-                {/* Descripción */}
-                <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Descripción</label>
-                    <textarea
-                        name="description"
-                        rows="3"
-                        onChange={handleChange}
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
-                        placeholder="Detalles del servicio..."
-                        required
-                    ></textarea>
                 </div>
 
                 <button
                     type="submit"
-                    className="bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-full mt-4 transition-colors"
+                    disabled={loading}
+                    className={`font-bold py-3 rounded-full mt-2 transition-colors text-white ${loading
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-primary hover:bg-primary-hover'
+                        }`}
                 >
-                    Guardar Servicio
+                    {loading ? 'Subiendo imágenes...' : 'Guardar Servicio'}
                 </button>
-
             </form>
         </div>
     );

@@ -11,7 +11,6 @@ const serviceSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true,
-        enum: ['Bodas', 'Infantiles', 'Baby Shower', 'Corporativo', 'Quinceañeros'] // Solo aceptamos estas categorías
     },
     price: {
         type: Number,

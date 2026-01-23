@@ -2,23 +2,34 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import serviceRoutes from './routes/services.routes.js'; // <--- 1. IMPORTAR RUTAS
+import cookieParser from 'cookie-parser'; // <--- CAMBIO 1: Importar
+import serviceRoutes from './routes/services.routes.js';
+import authRoutes from './routes/auth.routes.js'; // <--- CAMBIO 2: Importar rutas auth
+import categoryRoutes from './routes/categories.routes.js';
+import configRoutes from './routes/config.routes.js'; // Importar
+import uploadRoutes from './routes/upload.routes.js';
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Configurar CORS para permitir cookies del frontend
+app.use(cors({
+    origin: 'http://localhost:5173', // <--- CAMBIO 3: Especificar URL exacta del frontend
+    credentials: true // <--- CAMBIO 4: Permitir cookies
+}));
+
 app.use(express.json());
-app.use(cors());
+app.use(cookieParser()); // <--- CAMBIO 5: Usar cookie-parser
 
-// --- ZONA DE RUTAS ---
-app.use('/api/services', serviceRoutes); // <--- 2. USAR RUTAS
-// Esto significa que todo lo de serviceRoutes empezará con /api/services
+// Rutas
+app.use('/api/services', serviceRoutes);
+app.use('/api/auth', authRoutes); // <--- CAMBIO 6: Usar rutas auth
+app.use('/api/categories', categoryRoutes);
+app.use('/api/config', configRoutes); // <--- Usar
+app.use('/api/upload', uploadRoutes);
 
-app.get('/', (req, res) => {
-    res.send('API Paola Deco funcionando');
-});
-
+// ... el resto de la conexión a DB y startServer sigue igual ...
 const startServer = async () => {
     try {
         if (process.env.MONGODB_URI) {
@@ -26,7 +37,7 @@ const startServer = async () => {
             console.log(' Conectado a MongoDB Atlas');
         }
         app.listen(PORT, () => {
-            console.log(`Servidor corriendo en: http://localhost:${PORT}`);
+            console.log(` Servidor corriendo en: http://localhost:${PORT}`);
         });
     } catch (error) {
         console.error(' Error:', error);
