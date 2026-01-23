@@ -35,8 +35,27 @@ export function ServiceDetailPage() {
     if (loading) return <div className="text-center p-20">Cargando...</div>;
     if (!service) return <div className="text-center p-20">No encontrado</div>;
 
-    // LIMPIEZA Y RESPALDO (Crítico para que funcione el link)
-    const cleanNumber = whatsappNumber ? whatsappNumber.replace(/\D/g, '') : "51999999999";
+    // Formatear número de WhatsApp correctamente
+    const formatWhatsAppNumber = (number) => {
+        if (!number) return "51999999999"; // Número de respaldo
+        
+        // Remover todo excepto dígitos
+        let cleaned = number.replace(/\D/g, '');
+        
+        // Si el número empieza con 9 y tiene 9 dígitos, es un número peruano sin código de país
+        if (cleaned.startsWith('9') && cleaned.length === 9) {
+            cleaned = '51' + cleaned; // Agregar código de Perú
+        }
+        
+        // Si no empieza con 51 y tiene 9 dígitos, agregar código de país
+        if (!cleaned.startsWith('51') && cleaned.length === 9) {
+            cleaned = '51' + cleaned;
+        }
+        
+        return cleaned;
+    };
+    
+    const cleanNumber = formatWhatsAppNumber(whatsappNumber);
     const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(`Hola, me interesa: ${service.title}`)}`;
 
     return (

@@ -51,8 +51,27 @@ export function CatalogPage() {
         return () => clearTimeout(timeout);
     }, [search, selectedCategory, priceRange]);
 
-    // LIMPIEZA Y RESPALDO: Si no hay número configurado, usa uno por defecto
-    const cleanNumber = whatsappNumber ? whatsappNumber.replace(/\D/g, '') : "51999999999";
+    // Limpiar y formatear número de WhatsApp
+    const formatWhatsAppNumber = (number) => {
+        if (!number) return "51999999999"; // Número de respaldo
+        
+        // Remover todo excepto dígitos
+        let cleaned = number.replace(/\D/g, '');
+        
+        // Si el número empieza con 9 y tiene 9 dígitos, es un número peruano sin código de país
+        if (cleaned.startsWith('9') && cleaned.length === 9) {
+            cleaned = '51' + cleaned; // Agregar código de Perú
+        }
+        
+        // Si no empieza con 51 y tiene 9 dígitos, agregar código de país
+        if (!cleaned.startsWith('51') && cleaned.length === 9) {
+            cleaned = '51' + cleaned;
+        }
+        
+        return cleaned;
+    };
+    
+    const cleanNumber = formatWhatsAppNumber(whatsappNumber);
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 font-display flex flex-col md:flex-row gap-8">

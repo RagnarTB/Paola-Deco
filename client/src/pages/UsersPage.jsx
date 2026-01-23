@@ -20,7 +20,11 @@ export function UsersPage() {
             setUsers(res.data);
         } catch (error) {
             console.error(error);
-            toast.error("Error al cargar usuarios");
+            if (error.response?.status === 401) {
+                toast.error("No autorizado. Por favor inicia sesión nuevamente.");
+            } else {
+                toast.error("Error al cargar usuarios");
+            }
         } finally {
             setLoading(false);
         }
