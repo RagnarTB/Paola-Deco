@@ -41,7 +41,8 @@ router.post('/register', async (req, res) => {
         res.json({
             id: userSaved._id,
             username: userSaved.username,
-            email: userSaved.email
+            email: userSaved.email,
+            token: token // Enviar token también en el body para móviles
         });
 
     } catch (error) {
@@ -81,7 +82,8 @@ router.post('/login', async (req, res) => {
             id: userFound._id,
             username: userFound.username,
             email: userFound.email,
-            role: userFound.role
+            role: userFound.role,
+            token: token // Enviar token también en el body para móviles
         });
 
     } catch (error) {

@@ -21,10 +21,15 @@ export const AuthProvider = ({ children }) => {
     const signin = async (userData) => {
         try {
             const res = await loginRequest(userData);
+            
+            // Guardar token en localStorage para móviles
+            if (res.data.token) {
+                localStorage.setItem('token', res.data.token);
+            }
+            
             setIsAuthenticated(true);
             setUser(res.data);
         } catch (error) {
-            // ... tu manejo de errores ...
             setErrors(error.response?.data || ["Error al ingresar"]);
         }
     };
@@ -36,6 +41,7 @@ export const AuthProvider = ({ children }) => {
             console.log(error);
         } finally {
             Cookies.remove("token");
+            localStorage.removeItem('token'); // Limpiar localStorage
             setIsAuthenticated(false);
             setUser(null);
         }
@@ -45,8 +51,14 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         async function checkLogin() {
             const cookies = Cookies.get();
+            let token = cookies.token;
+            
+            // Si no hay token en cookies, buscar en localStorage (móviles)
+            if (!token) {
+                token = localStorage.getItem('token');
+            }
 
-            if (!cookies.token) {
+            if (!token) {
                 setIsAuthenticated(false);
                 setLoading(false);
                 return setUser(null);
@@ -54,7 +66,7 @@ export const AuthProvider = ({ children }) => {
 
             try {
                 // Verificamos si el token es válido en el backend
-                const res = await verifyTokenRequest(cookies.token);
+                const res = await verifyTokenRequest(token);
                 if (!res.data) {
                     setIsAuthenticated(false);
                     setLoading(false);
