@@ -1,25 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getService, getConfig } from '../api/services.api'; // <--- IMPORTAMOS getConfig
+import { getService, getConfig } from '../api/services.api';
 
 export function ServiceDetailPage() {
     const { id } = useParams();
     const [service, setService] = useState(null);
     const [activeImage, setActiveImage] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [whatsappNumber, setWhatsappNumber] = useState(""); // <--- Estado para el número
+    const [whatsappNumber, setWhatsappNumber] = useState("");
 
     useEffect(() => {
         async function loadData() {
             try {
-                // Cargamos Servicio y Configuración en paralelo
                 const [serviceRes, configRes] = await Promise.all([
                     getService(id),
                     getConfig()
                 ]);
 
                 setService(serviceRes.data);
-                setWhatsappNumber(configRes.data.whatsapp || ""); // Guardamos el número
+                setWhatsappNumber(configRes.data.whatsapp || "");
 
                 if (serviceRes.data.images && serviceRes.data.images.length > 0) {
                     setActiveImage(serviceRes.data.images[0]);
@@ -35,12 +34,10 @@ export function ServiceDetailPage() {
 
     if (loading) return <div className="text-center p-20">Cargando...</div>;
     if (!service) return <div className="text-center p-20">No encontrado</div>;
-    // FUNCIÓN DE LIMPIEZA: Quita espacios, +, -, ( )
-    const cleanNumber = whatsappNumber
-        ? whatsappNumber.replace(/\D/g, '') // Borra todo lo que NO sea número
-        : "51999999999"; // Número de respaldo si no hay config
-    // USAMOS EL NÚMERO DINÁMICO
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hola, me interesa: ${service.title}`)}`;
+
+    // LIMPIEZA Y RESPALDO (Crítico para que funcione el link)
+    const cleanNumber = whatsappNumber ? whatsappNumber.replace(/\D/g, '') : "51999999999";
+    const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(`Hola, me interesa: ${service.title}`)}`;
 
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-10 font-display">
@@ -49,8 +46,6 @@ export function ServiceDetailPage() {
             </Link>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-
-                {/* --- GALERÍA --- */}
                 <div className="flex flex-col gap-4">
                     <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm relative group">
                         {activeImage ? (
@@ -59,7 +54,6 @@ export function ServiceDetailPage() {
                             <div className="flex items-center justify-center h-full text-gray-400">Sin imagen</div>
                         )}
                     </div>
-
                     {service.images && service.images.length > 1 && (
                         <div className="flex gap-3 overflow-x-auto pb-2">
                             {service.images.map((img, index) => (
@@ -75,14 +69,11 @@ export function ServiceDetailPage() {
                     )}
                 </div>
 
-                {/* --- INFO --- */}
                 <div className="flex flex-col justify-center">
                     <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold w-fit mb-4 uppercase tracking-wider">
                         {service.category}
                     </span>
-
                     <h1 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">{service.title}</h1>
-
                     <div className="prose prose-gray max-w-none text-gray-600 mb-8 leading-relaxed">
                         {service.description}
                     </div>
@@ -102,7 +93,6 @@ export function ServiceDetailPage() {
                         </div>
                     </div>
 
-                    {/* Botón WhatsApp Dinámico */}
                     <a
                         href={whatsappUrl}
                         target="_blank"

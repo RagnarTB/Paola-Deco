@@ -1,19 +1,17 @@
 import { useEffect, useState } from 'react';
-import { getAllServices, getCategories, getConfig } from '../api/services.api'; // <--- Importamos getConfig
+import { getAllServices, getCategories, getConfig } from '../api/services.api';
 import { Link } from 'react-router-dom';
 
 export function CatalogPage() {
     const [services, setServices] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [whatsappNumber, setWhatsappNumber] = useState(""); // <--- Estado número
+    const [whatsappNumber, setWhatsappNumber] = useState("");
 
-    // Filtros
     const [search, setSearch] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [priceRange, setPriceRange] = useState({ min: "", max: "" });
 
-    // Cargar Datos Iniciales (Categorías y Configuración)
     useEffect(() => {
         async function loadInitialData() {
             try {
@@ -22,15 +20,15 @@ export function CatalogPage() {
                     getConfig()
                 ]);
                 setCategories(catsRes.data.filter(c => c.isActive));
-                setWhatsappNumber(configRes.data.whatsapp || ""); // Guardamos número
+                // Guardamos el número si existe
+                setWhatsappNumber(configRes.data.whatsapp || "");
             } catch (error) {
-                console.error("Error cargando datos iniciales", error);
+                console.error("Error cargando datos", error);
             }
         }
         loadInitialData();
     }, []);
 
-    // Cargar Servicios (Filtros)
     useEffect(() => {
         const fetchServices = async () => {
             setLoading(true);
@@ -49,17 +47,16 @@ export function CatalogPage() {
                 setLoading(false);
             }
         };
-
         const timeout = setTimeout(fetchServices, 400);
         return () => clearTimeout(timeout);
     }, [search, selectedCategory, priceRange]);
 
-    const cleanNumber = whatsappNumber ? whatsappNumber.replace(/\D/g, '') : "";
+    // LIMPIEZA Y RESPALDO: Si no hay número configurado, usa uno por defecto
+    const cleanNumber = whatsappNumber ? whatsappNumber.replace(/\D/g, '') : "51999999999";
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 font-display flex flex-col md:flex-row gap-8">
-
-            {/* --- SIDEBAR FILTROS --- */}
+            {/* Sidebar Filtros (Igual que antes) */}
             <aside className="w-full md:w-64 flex-shrink-0 space-y-8">
                 <div>
                     <h3 className="font-bold text-gray-800 mb-4">Buscar</h3>
@@ -120,7 +117,7 @@ export function CatalogPage() {
                 </div>
             </aside>
 
-            {/* --- GRID DE RESULTADOS --- */}
+            {/* Grid Resultados */}
             <div className="flex-1">
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">Catálogo de Servicios</h1>
@@ -140,13 +137,8 @@ export function CatalogPage() {
                         {services.map(service => (
                             <div key={service._id} className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
                                 <Link to={`/servicio/${service._id}`} className="block h-48 overflow-hidden relative">
-                                    <img
-                                        src={service.images[0] || 'placeholder.jpg'}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold uppercase">
-                                        {service.category}
-                                    </div>
+                                    <img src={service.images[0] || 'placeholder.jpg'} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold uppercase">{service.category}</div>
                                 </Link>
                                 <div className="p-4 flex-1 flex flex-col">
                                     <Link to={`/servicio/${service._id}`}>
@@ -155,9 +147,9 @@ export function CatalogPage() {
                                     <div className="flex justify-between items-center mt-auto pt-2">
                                         <p className="text-primary font-bold">S/ {service.price}</p>
 
-                                        {/* BOTÓN WHATSAPP EN CATALOGO */}
+                                        {/* BOTÓN CORREGIDO */}
                                         <a
-                                            href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hola, me interesa: ${service.title}`)}`}
+                                            href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent(`Hola, me interesa: ${service.title}`)}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-600 hover:text-white transition-colors"

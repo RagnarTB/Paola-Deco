@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import { getUsers, createUser, deleteUser, updateUser } from '../api/services.api';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
-import { UserModal } from '../components/UserModal'; // Importar Modal
+import { UserModal } from '../components/UserModal';
 
 export function UsersPage() {
     const [users, setUsers] = useState([]);
     const [formData, setFormData] = useState({ username: '', email: '', password: '', role: 'editor' });
-    const [editingUser, setEditingUser] = useState(null); // Estado para modal
+    const [editingUser, setEditingUser] = useState(null);
+    const [loading, setLoading] = useState(true); // Estado de carga
 
-    const ROOT_EMAIL = "admin@paoladeco.com"; // Debe coincidir con el backend
+    const ROOT_EMAIL = "admin@paoladeco.com";
 
     useEffect(() => { loadUsers() }, []);
 
@@ -17,7 +18,12 @@ export function UsersPage() {
         try {
             const res = await getUsers();
             setUsers(res.data);
-        } catch (error) { console.error(error); }
+        } catch (error) {
+            console.error(error);
+            toast.error("Error al cargar usuarios");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -67,36 +73,40 @@ export function UsersPage() {
         }
     };
 
+    if (loading) return <div className="p-8 text-center">Cargando usuarios...</div>;
+
     return (
-        <div className="max-w-5xl mx-auto pb-20 font-display">
+        <div className="max-w-5xl mx-auto font-display">
             <h1 className="text-2xl font-bold mb-6">Gestión de Personal</h1>
 
-            {/* Formulario Crear (Igual que antes) */}
+            {/* Formulario Crear */}
             <div className="bg-white p-6 rounded-xl border border-gray-200 mb-8 shadow-sm">
                 <h3 className="font-bold mb-4">Registrar Nuevo Empleado</h3>
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" placeholder="Nombre" value={formData.username} onChange={e => setFormData({ ...formData, username: e.target.value })} className="p-2 border rounded" required />
-                    <input type="email" placeholder="Email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className="p-2 border rounded" required />
-                    <input type="password" placeholder="Contraseña" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} className="p-2 border rounded" required />
-                    <select value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} className="p-2 border rounded">
+                    <input type="text" placeholder="Nombre" value={formData.username} onChange={e => setFormData({ ...formData, username: e.target.value })} className="p-3 border rounded-lg w-full" required />
+                    <input type="email" placeholder="Email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className="p-3 border rounded-lg w-full" required />
+                    <input type="password" placeholder="Contraseña" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} className="p-3 border rounded-lg w-full" required />
+                    <select value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} className="p-3 border rounded-lg w-full bg-white">
                         <option value="editor">Editor (Acceso Limitado)</option>
                         <option value="admin">Administrador (Acceso Total)</option>
                     </select>
-                    <button className="bg-primary text-white font-bold py-2 rounded md:col-span-2 hover:bg-primary-hover">Crear Usuario</button>
+                    <button className="bg-primary text-white font-bold py-3 rounded-lg md:col-span-2 hover:bg-primary-hover shadow-lg active:scale-95 transition-transform">
+                        Crear Usuario
+                    </button>
                 </form>
             </div>
 
-            {/* Tabla */}
+            {/* Tabla con Scroll Horizontal (CLAVE PARA MÓVIL) */}
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left min-w-[600px]">
+                <div className="overflow-x-auto w-full">
+                    <table className="w-full text-left min-w-[700px]">
                         <thead className="bg-gray-50 border-b text-gray-500 text-xs uppercase">
                             <tr>
-                                <th className="p-4">Nombre</th>
-                                <th className="p-4">Email</th>
-                                <th className="p-4 text-center">Rol</th>
-                                <th className="p-4 text-center">Estado</th>
-                                <th className="p-4 text-right">Acciones</th>
+                                <th className="p-4 whitespace-nowrap">Nombre</th>
+                                <th className="p-4 whitespace-nowrap">Email</th>
+                                <th className="p-4 text-center whitespace-nowrap">Rol</th>
+                                <th className="p-4 text-center whitespace-nowrap">Estado</th>
+                                <th className="p-4 text-right whitespace-nowrap">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -104,8 +114,8 @@ export function UsersPage() {
                                 const isRoot = user.email === ROOT_EMAIL;
                                 return (
                                     <tr key={user._id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="p-4 font-bold text-gray-800">{user.username}</td>
-                                        <td className="p-4 text-gray-600 text-sm">{user.email}</td>
+                                        <td className="p-4 font-bold text-gray-800 whitespace-nowrap">{user.username}</td>
+                                        <td className="p-4 text-gray-600 text-sm whitespace-nowrap">{user.email}</td>
                                         <td className="p-4 text-center">
                                             <span className={`px-2 py-1 rounded text-xs font-bold border ${user.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
                                                 {user.role.toUpperCase()}
@@ -126,15 +136,14 @@ export function UsersPage() {
                                         <td className="p-4 text-right">
                                             {!isRoot && (
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <button onClick={() => setEditingUser(user)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors" title="Editar">
-                                                        <span className="material-symbols-outlined text-[20px]">edit</span>
+                                                    <button onClick={() => setEditingUser(user)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full" title="Editar">
+                                                        <span className="material-symbols-outlined">edit</span>
                                                     </button>
-                                                    <button onClick={() => handleDelete(user)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors" title="Eliminar">
-                                                        <span className="material-symbols-outlined text-[20px]">delete</span>
+                                                    <button onClick={() => handleDelete(user)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full" title="Eliminar">
+                                                        <span className="material-symbols-outlined">delete</span>
                                                     </button>
                                                 </div>
                                             )}
-                                            {isRoot && <span className="text-xs text-gray-300 font-bold italic pr-2">Protegido</span>}
                                         </td>
                                     </tr>
                                 );
@@ -142,15 +151,11 @@ export function UsersPage() {
                         </tbody>
                     </table>
                 </div>
+                {users.length === 0 && <div className="p-8 text-center text-gray-500">No hay usuarios registrados.</div>}
             </div>
 
-            {/* Modal de Edición */}
             {editingUser && (
-                <UserModal
-                    user={editingUser}
-                    onClose={() => setEditingUser(null)}
-                    onUpdate={loadUsers}
-                />
+                <UserModal user={editingUser} onClose={() => setEditingUser(null)} onUpdate={loadUsers} />
             )}
         </div>
     );
