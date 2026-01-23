@@ -106,7 +106,7 @@ router.get('/verify', async (req, res) => {
 
     if (!token) return res.status(401).json({ message: "No autorizado" });
 
-    jwt.verify(token, process.env.TOKEN_SECRET || "claveSecreta123", async (err, user) => {
+    jwt.verify(token, process.env.TOKEN_SECRET || "PaolaDecoSecretKey2026", async (err, user) => {
         if (err) return res.status(401).json({ message: "No autorizado" });
 
         const userFound = await User.findById(user.id);
