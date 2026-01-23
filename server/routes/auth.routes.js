@@ -3,6 +3,8 @@ import { Router } from 'express';
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import { createAccessToken } from '../libs/jwt.js';
+import jwt from 'jsonwebtoken';
+import { TOKEN_SECRET } from '../libs/jwt.js';
 
 const router = Router();
 
@@ -86,6 +88,27 @@ router.post('/logout', (req, res) => {
         expires: new Date(0)
     });
     return res.sendStatus(200);
+});
+
+// VERIFICAR TOKEN (Para persistencia de sesión)
+router.get('/verify', async (req, res) => {
+    const { token } = req.cookies;
+
+    if (!token) return res.status(401).json({ message: "No autorizado" });
+
+    jwt.verify(token, process.env.TOKEN_SECRET || "claveSecreta123", async (err, user) => {
+        if (err) return res.status(401).json({ message: "No autorizado" });
+
+        const userFound = await User.findById(user.id);
+        if (!userFound) return res.status(401).json({ message: "No autorizado" });
+
+        return res.json({
+            id: userFound._id,
+            username: userFound.username,
+            email: userFound.email,
+            role: userFound.role
+        });
+    });
 });
 
 export default router;
