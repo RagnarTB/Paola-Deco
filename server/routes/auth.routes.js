@@ -54,6 +54,10 @@ router.post('/login', async (req, res) => {
         const userFound = await User.findOne({ email });
         if (!userFound) return res.status(400).json({ message: "Usuario no encontrado" });
 
+        if (userFound.isActive === false) {
+            return res.status(401).json({ message: "Cuenta desactivada. Contacte al administrador." });
+        }
+
         // 2. Comparar contraseñas
         const isMatch = await bcrypt.compare(password, userFound.password);
         if (!isMatch) return res.status(400).json({ message: "Contraseña incorrecta" });
@@ -67,7 +71,8 @@ router.post('/login', async (req, res) => {
         res.json({
             id: userFound._id,
             username: userFound.username,
-            email: userFound.email
+            email: userFound.email,
+            role: userFound.role
         });
 
     } catch (error) {

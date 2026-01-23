@@ -17,7 +17,7 @@ export function CategoriesPage() {
     const [newCatImage, setNewCatImage] = useState("");
     const [uploading, setUploading] = useState(false);
 
-    // Editar
+    // Editar (CORRECCIÓN 1: strings vacíos)
     const [editingId, setEditingId] = useState(null);
     const [editingName, setEditingName] = useState("");
     const [editingImage, setEditingImage] = useState("");
@@ -134,10 +134,7 @@ export function CategoriesPage() {
                         Define las secciones de tu catálogo. Todo se guarda en MAYÚSCULAS.
                     </p>
                 </div>
-                <Link
-                    to="/admin"
-                    className="text-primary hover:underline font-bold"
-                >
+                <Link to="/admin" className="text-primary hover:underline font-bold">
                     Volver al Dashboard
                 </Link>
             </div>
@@ -295,7 +292,7 @@ export function CategoriesPage() {
                                         onClick={() => {
                                             setEditingId(cat._id);
                                             setEditingName(cat.name);
-                                            setEditingImage(cat.image || "");
+                                            setEditingImage(cat.image || ""); // CORRECCIÓN 2: nunca null
                                         }}
                                         className="text-blue-500 hover:text-blue-700 font-bold text-sm mr-4"
                                     >

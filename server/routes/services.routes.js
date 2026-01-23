@@ -116,46 +116,31 @@ router.post('/', upload.array('images', 5), async (req, res) => {
 });
 
 /* ======================================================
-   PUT: Actualizar Servicio (Editar + Estado + Imágenes)
+   PUT: Actualizar Servicio (JSON + images[])
+   NOTA: Ya NO se suben archivos aquí.
+   El frontend envía un JSON con 'images' (array de URLs).
 ====================================================== */
-router.put('/:id', upload.array('images', 5), async (req, res) => {
+router.put('/:id', upload.none(), async (req, res) => {
     try {
-        // Nota: 'existingImages' viene del frontend con las fotos que NO borraste
-        const { title, category, price, description, isActive, existingImages } = req.body;
+        const { title, category, price, description, isActive, images } = req.body;
 
         let updateData = { title, category, price, description };
 
-        // Actualizar estado si viene
+        // Estado seguro
         if (isActive !== undefined) {
             updateData.isActive = isActive === 'true' || isActive === true;
         }
 
-        // --- LÓGICA DE IMÁGENES MEJORADA ---
+        // --- LÓGICA CRÍTICA DE IMÁGENES ---
 
-        // 1. Recuperamos las imágenes antiguas que el usuario decidió mantener
-        // (Si el frontend manda solo una string, la convertimos a array)
-        let finalImages = existingImages
-            ? (Array.isArray(existingImages) ? existingImages : [existingImages])
-            : [];
-
-        // 2. Subimos las NUEVAS imágenes (si hay)
-        if (req.files && req.files.length > 0) {
-            const uploadPromises = req.files.map(file => uploadImage(file.path));
-            const results = await Promise.all(uploadPromises);
-            const newImageURLs = results.map(result => result.secure_url);
-
-            // Sumamos las nuevas a las existentes
-            finalImages = [...finalImages, ...newImageURLs];
-
-            // Limpieza
-            await Promise.all(req.files.map(file => fs.unlink(file.path)));
-        }
-
-        // Solo actualizamos el campo images si tenemos un array final válido
-        // Ojo: Si finalImages está vacío, significa que el usuario borró TODAS las fotos
-        // Si no enviamos nada de images/existingImages, asumimos que no se tocó esa parte
-        if (req.files.length > 0 || existingImages) {
-            updateData.images = finalImages;
+        if (images !== undefined) {
+            if (images === "") {
+                // Caso: borraron TODAS las imágenes
+                updateData.images = [];
+            } else {
+                // Asegurar array aunque venga una sola string
+                updateData.images = Array.isArray(images) ? images : [images];
+            }
         }
 
         const updatedService = await Service.findByIdAndUpdate(
@@ -171,12 +156,11 @@ router.put('/:id', upload.array('images', 5), async (req, res) => {
         res.json(updatedService);
 
     } catch (error) {
-        if (req.files) {
-            await Promise.all(req.files.map(file => fs.unlink(file.path).catch(e => { })));
-        }
+        console.error(error);
         res.status(500).json({ message: error.message });
     }
 });
+
 
 /* ======================================================
    DELETE: Eliminar Servicio

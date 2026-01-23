@@ -16,6 +16,15 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true // Aquí se guardará encriptada
+    },
+    role: {
+        type: String,
+        enum: ['admin', 'editor'],
+        default: 'editor'
+    }, 
+    isActive: {
+        type: Boolean,
+        default: true
     }
 }, {
     timestamps: true

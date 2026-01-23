@@ -8,9 +8,11 @@ import authRoutes from './routes/auth.routes.js'; // <--- CAMBIO 2: Importar rut
 import categoryRoutes from './routes/categories.routes.js';
 import configRoutes from './routes/config.routes.js'; // Importar
 import uploadRoutes from './routes/upload.routes.js';
-
+import { createAdminUser } from './libs/initialSetup.js';
+import userRoutes from './routes/users.routes.js';
 dotenv.config();
 const app = express();
+
 const PORT = process.env.PORT || 5000;
 
 // Configurar CORS para permitir cookies del frontend
@@ -21,6 +23,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser()); // <--- CAMBIO 5: Usar cookie-parser
+app.use('/api/users', userRoutes);
 
 // Rutas
 app.use('/api/services', serviceRoutes);
@@ -35,6 +38,7 @@ const startServer = async () => {
         if (process.env.MONGODB_URI) {
             await mongoose.connect(process.env.MONGODB_URI);
             console.log(' Conectado a MongoDB Atlas');
+            await createAdminUser();
         }
         app.listen(PORT, () => {
             console.log(` Servidor corriendo en: http://localhost:${PORT}`);

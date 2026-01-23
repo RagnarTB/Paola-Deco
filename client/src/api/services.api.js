@@ -98,3 +98,9 @@ export const uploadFile = (formData) => {
         headers: { 'Content-Type': 'multipart/form-data' }
     });
 };
+
+// Usuarios
+export const getUsers = () => axiosInstance.get('/users');
+export const createUser = (user) => axiosInstance.post('/users', user);
+export const deleteUser = (id) => axiosInstance.delete(`/users/${id}`);
+export const updateUser = (id, data) => axiosInstance.put(`/users/${id}`, data);

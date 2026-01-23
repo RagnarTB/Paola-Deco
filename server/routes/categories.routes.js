@@ -52,12 +52,11 @@ router.post('/', async (req, res) => {
 });
 
 /* ======================================================
-   PUT: Editar nombre / Activar / Desactivar categoría
+   PUT: Editar nombre / Activar / Desactivar / Imagen
 ====================================================== */
 router.put('/:id', async (req, res) => {
     try {
         const { name, isActive, image } = req.body;
-        if (image !== undefined) updateData.image = image;
 
         // 1. Si intentan DESACTIVAR, verificamos servicios activos
         if (isActive === false || isActive === 'false') {
@@ -71,7 +70,7 @@ router.put('/:id', async (req, res) => {
 
                 if (servicesCount > 0) {
                     return res.status(400).json({
-                        message: `No se puede desactivar. Hay ${servicesCount} servicios activos en esta categoría.`
+                        message: `No se puede desactivar. Hay ${servicesCount} servicios activos usándola.`
                     });
                 }
             }
@@ -79,7 +78,7 @@ router.put('/:id', async (req, res) => {
 
         const updateData = {};
 
-        // Actualizar nombre si viene
+        // 2. Actualizar nombre si viene
         if (name && name.trim()) {
             const upperName = name.trim().toUpperCase();
 
@@ -99,9 +98,14 @@ router.put('/:id', async (req, res) => {
             updateData.slug = upperName.toLowerCase().replace(/ /g, '-');
         }
 
-        // Actualizar estado si viene
+        // 3. Actualizar estado si viene
         if (isActive !== undefined) {
             updateData.isActive = isActive === true || isActive === 'true';
+        }
+
+        // 4. Actualizar imagen si viene (ESTO ES LO NUEVO)
+        if (image !== undefined) {
+            updateData.image = image; // permite cambiar o borrar imagen
         }
 
         const updated = await Category.findByIdAndUpdate(
@@ -117,6 +121,7 @@ router.put('/:id', async (req, res) => {
         res.json(updated);
 
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: error.message });
     }
 });

@@ -13,7 +13,7 @@ import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { CategoriesPage } from './pages/CategoriesPage'; // <--- IMPORTAR
 import { AdminConfigPage } from './pages/AdminConfigPage'; // <--- IMPORTAR
 import { AdminLayout } from './layouts/AdminLayout';
-
+import { UsersPage } from './pages/UsersPage';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -39,6 +39,7 @@ function App() {
               <Route element={<AdminLayout />}>
                 <Route path="/admin" element={<AdminDashboardPage />} />
                 <Route path="/admin/crear" element={<ServiceFormPage />} />
+                <Route path="/admin/usuarios" element={<UsersPage />} />
                 <Route path="/admin/categorias" element={<CategoriesPage />} />  {/* <--- NUEVA */}
                 <Route path="/admin/configuracion" element={<AdminConfigPage />} /> {/* <--- NUEVA */}
               </Route>
