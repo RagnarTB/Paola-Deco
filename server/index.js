@@ -44,6 +44,9 @@ app.use(express.json());
 app.use(cookieParser()); // <--- CAMBIO 5: Usar cookie-parser
 app.use('/api/users', userRoutes);
 
+
+app.get('/ping', (req, res) => res.send('pong'));
+
 // Rutas
 app.use('/api/services', serviceRoutes);
 app.use('/api/auth', authRoutes); // <--- CAMBIO 6: Usar rutas auth
