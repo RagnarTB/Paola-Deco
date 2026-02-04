@@ -1,10 +1,10 @@
-# 🎉 Paola Deco & Eventos
+#  Paola Deco & Eventos
 
 Plataforma web **Full Stack (MERN)** profesional para la gestión y visualización de un catálogo de servicios de decoración de eventos. Sistema completo con panel de administración avanzado, autenticación segura, gestión dinámica de contenido multimedia, y experiencia de usuario optimizada.
 
 ---
 
-## 🚀 Tecnologías Utilizadas
+##  Tecnologías Utilizadas
 
 ### **Frontend (Cliente)**
 - **React 19** + **Vite** - Interfaz moderna y reactiva con HMR
@@ -30,88 +30,88 @@ Plataforma web **Full Stack (MERN)** profesional para la gestión y visualizaci�
 
 ---
 
-## ✨ Funcionalidades Implementadas
+##  Funcionalidades Implementadas
 
-### 🌐 **Zona Pública**
+###  **Zona Pública**
 
 #### **Página de Inicio Dinámica**
-- ✅ **Carrusel Hero** completamente configurable desde el admin
+-  **Carrusel Hero** completamente configurable desde el admin
   - Múltiples slides con imágenes de alta calidad
   - Títulos, subtítulos y botones personalizables
   - Transiciones suaves y autoplay
   - Navegación manual con flechas e indicadores
-- ✅ **Sección "¿Por qué elegirnos?"** con características destacadas
+-  **Sección "¿Por qué elegirnos?"** con características destacadas
   - Iconos personalizables de Google Material Symbols
   - Títulos y descripciones editables
   - Animaciones hover elegantes
-- ✅ **Galería de Categorías** con imágenes reales
+-  **Galería de Categorías** con imágenes reales
   - Carga dinámica desde la base de datos
   - Solo muestra categorías activas
   - Efectos de hover con escala de imagen
   - Enlaces directos al catálogo filtrado
-- ✅ **Sección de Videos TikTok**
+-  **Sección de Videos TikTok**
   - Integración nativa de videos de TikTok
   - Carrusel de videos destacados
   - Diseño tipo smartphone con efectos visuales
   - Extracción automática de embed IDs
 
 #### **Catálogo Avanzado**
-- ✅ **Sistema de Búsqueda en Tiempo Real**
+-  **Sistema de Búsqueda en Tiempo Real**
   - Búsqueda por título con debounce (400ms)
   - Resultados instantáneos sin recargar página
-- ✅ **Filtros Múltiples**
+-  **Filtros Múltiples**
   - Filtro por categoría (radio buttons)
   - Filtro por rango de precios (mín/máx)
   - Solo muestra servicios activos al público
   - Combinación de filtros simultáneos
-- ✅ **Paginación del Lado del Servidor**
+-  **Paginación del Lado del Servidor**
   - Carga eficiente de resultados
   - Navegación entre páginas
   - Contador de resultados totales
-- ✅ **Diseño Responsivo**
+-  **Diseño Responsivo**
   - Sidebar de filtros en desktop
   - Filtros colapsables en móvil
   - Grid adaptativo (1/2/3 columnas)
-- ✅ **Tarjetas de Servicio**
+-  **Tarjetas de Servicio**
   - Imagen principal con efecto zoom hover
   - Badge de categoría
   - Precio destacado
   - Enlace a página de detalle
 
 #### **Página de Detalle del Servicio**
-- ✅ Galería de imágenes completa
-- ✅ Información detallada del servicio
-- ✅ Precio y categoría destacados
-- ✅ Botón de contacto directo por WhatsApp
+-  Galería de imágenes completa
+-  Información detallada del servicio
+-  Precio y categoría destacados
+-  Botón de contacto directo por WhatsApp
 
 #### **Componentes Globales**
-- ✅ **Navbar** con información dinámica del sitio
-- ✅ **Footer** con datos de contacto configurables
-- ✅ **Integración WhatsApp** en múltiples puntos
-- ✅ **Diseño 100% Responsivo** en todos los dispositivos
+-  **Navbar** con información dinámica del sitio
+-  **Footer** con datos de contacto configurables
+-  **Integración WhatsApp** en múltiples puntos
+-  **Diseño 100% Responsivo** en todos los dispositivos
 
 ---
 
-### 🔐 **Sistema de Autenticación**
+###  **Sistema de Autenticación**
 
-- ✅ **Registro de Administradores**
+-  **Registro de Administradores**
   - Validación de datos en frontend y backend
   - Encriptación bcrypt (10 rounds)
   - Prevención de emails duplicados
-- ✅ **Login Seguro**
+-  **Login Seguro**
   - Autenticación con JWT
   - Tokens almacenados en cookies httpOnly
   - Validación de credenciales
   - Mensajes de error descriptivos
-- ✅ **Logout**
+-  **Logout**
   - Limpieza de cookies
   - Redirección automática
   - Actualización de estado global
-- ✅ **Rutas Protegidas**
+-  **Rutas Protegidas**
   - Middleware de verificación de tokens
   - Redirección automática si no autenticado
   - Componente `ProtectedRoute` reutilizable
-- ✅ **Context API Global**
+-  **Context API Global**
   - Estado de autenticación compartido
   - Funciones `signin`, `signup`, `logout`
   - Manejo centralizado de errores
@@ -122,25 +122,25 @@ Plataforma web **Full Stack (MERN)** profesional para la gestión y visualizaci�
 ### 🎛️ **Panel de Administración Completo**
 
 #### **Dashboard de Servicios**
-- ✅ **Tabla Interactiva con Paginación**
+-  **Tabla Interactiva con Paginación**
   - Vista de todos los servicios (5 por página)
   - Navegación entre páginas (Anterior/Siguiente)
   - Contador de páginas actual/total
-- ✅ **Búsqueda en Tiempo Real**
+-  **Búsqueda en Tiempo Real**
   - Barra de búsqueda con icono
   - Debounce de 500ms para optimizar peticiones
   - Búsqueda por título del servicio
-- ✅ **Columnas de Información**
+-  **Columnas de Información**
   - Imagen miniatura (thumbnail)
   - Título del servicio
   - Categoría con badge
   - Precio formateado
   - **Estado (Activo/Inactivo)** con toggle visual
-- ✅ **Acciones por Servicio**
+-  **Acciones por Servicio**
   - **Botón Editar**: Abre modal de edición
   - **Botón Eliminar**: Confirmación con SweetAlert2
   - **Toggle de Estado**: Activar/desactivar con un clic
-- ✅ **Modal de Edición Avanzado**
+-  **Modal de Edición Avanzado**
   - Formulario completo en modal overlay
   - Edición de título, precio, categoría, descripción
   - **Gestión de imágenes**:
@@ -151,57 +151,57 @@ Plataforma web **Full Stack (MERN)** profesional para la gestión y visualizaci�
   - Cambio de estado (Activo/Inactivo)
   - Validación en tiempo real
   - Botones Guardar/Cancelar
-- ✅ **Notificaciones Toast**
+-  **Notificaciones Toast**
   - Confirmación de acciones exitosas
   - Alertas de errores
   - Indicadores de carga (uploading)
   - Posición top-center no intrusiva
-- ✅ **Responsive Design**
+-  **Responsive Design**
   - Tabla con scroll horizontal en móvil
   - Modal adaptado a pantallas pequeñas
   - Botones táctiles optimizados
 
 #### **Gestión de Categorías**
-- ✅ **CRUD Completo**
+-  **CRUD Completo**
   - Crear categorías con nombre e imagen
   - Editar nombre e imagen inline
   - Eliminar con validación de seguridad
   - **Activar/Desactivar** categorías
-- ✅ **Validaciones Inteligentes**
+-  **Validaciones Inteligentes**
   - Nombres únicos (sin duplicados)
   - Conversión automática a MAYÚSCULAS
   - Generación automática de slugs
   - **Protección de eliminación**: No se puede borrar si tiene servicios asociados
   - **Protección de desactivación**: No se puede desactivar si tiene servicios activos
-- ✅ **Upload de Imágenes**
+-  **Upload de Imágenes**
   - Imagen de portada para cada categoría
   - Vista previa en tiempo real
   - Almacenamiento en Cloudinary
   - Indicador de carga
-- ✅ **Interfaz de Edición Inline**
+-  **Interfaz de Edición Inline**
   - Modo edición activable por fila
   - Campos de texto y upload de imagen
   - Botones Guardar/Cancelar
   - Sin necesidad de modal separado
-- ✅ **Estados Visuales**
+-  **Estados Visuales**
   - Badge de estado (ACTIVO/INACTIVO)
   - Colores distintivos (verde/rojo)
   - Toggle con un clic
-- ✅ **Tabla Organizada**
+-  **Tabla Organizada**
   - Imagen miniatura
   - Nombre en mayúsculas
   - Estado con badge
   - Acciones (Editar/Eliminar)
 
 #### **Configuración del Sitio**
-- ✅ **Información General**
+-  **Información General**
   - Nombre del sitio
   - Logo (URL)
   - WhatsApp (formato internacional)
   - Email de contacto
   - Dirección física
   - Enlaces a redes sociales (Facebook, Instagram)
-- ✅ **Gestión de Slides del Hero**
+-  **Gestión de Slides del Hero**
   - Agregar múltiples slides
   - Campos por slide:
     - Título principal
@@ -211,13 +211,13 @@ Plataforma web **Full Stack (MERN)** profesional para la gestión y visualizaci�
   - Vista previa de imagen
   - Eliminar slides individuales
   - Orden personalizable
-- ✅ **Integración de Videos TikTok**
+-  **Integración de Videos TikTok**
   - Agregar hasta 5 videos
   - Pegar URL de TikTok
   - Extracción automática de embed ID
   - Vista previa del video
   - Eliminar videos
-- ✅ **Sección "¿Por qué elegirnos?"**
+-  **Sección "¿Por qué elegirnos?"**
   - Agregar características destacadas
   - Campos por característica:
     - Icono (nombre de Google Material Symbols)
@@ -226,26 +226,26 @@ Plataforma web **Full Stack (MERN)** profesional para la gestión y visualizaci�
   - Link directo a biblioteca de iconos
   - Eliminar características
   - Grid responsivo (1/2 columnas)
-- ✅ **Guardado Global**
+-  **Guardado Global**
   - Botón "Guardar Configuración" al final
   - Actualiza toda la configuración de una vez
   - Notificación de éxito/error
   - Indicador de carga durante guardado
 
 #### **Sidebar de Navegación**
-- ✅ **Diseño Responsivo**
+-  **Diseño Responsivo**
   - Sidebar fijo en desktop
   - Menú hamburguesa en móvil
   - Overlay oscuro en móvil
   - Animación de deslizamiento
   - Cierre automático al navegar (móvil)
-- ✅ **Navegación**
+-  **Navegación**
   - Dashboard (Servicios)
   - Categorías
   - Configuración
   - Ver Catálogo Público
   - Cerrar Sesión
-- ✅ **Estados Visuales**
+-  **Estados Visuales**
   - Resaltado de página activa
   - Iconos Material Symbols
   - Hover effects
@@ -253,26 +253,26 @@ Plataforma web **Full Stack (MERN)** profesional para la gestión y visualizaci�
 
 ---
 
-### 🖼️ **Gestión de Imágenes con Cloudinary**
+###  **Gestión de Imágenes con Cloudinary**
 
-- ✅ **Upload Múltiple**
+-  **Upload Múltiple**
   - Subida de hasta 5 imágenes por servicio
   - Procesamiento en paralelo con `Promise.all`
   - Indicadores de progreso
-- ✅ **Vista Previa**
+-  **Vista Previa**
   - Thumbnails de imágenes subidas
   - Hover para mostrar botón de eliminar
   - Grid responsivo de imágenes
-- ✅ **Eliminación Inteligente**
+-  **Eliminación Inteligente**
   - Eliminar imágenes individuales
   - Actualización inmediata del estado
   - Limpieza de archivos temporales
-- ✅ **Optimización**
+-  **Optimización**
   - Compresión automática
   - Transformaciones de Cloudinary
   - URLs seguras (HTTPS)
   - CDN global para carga rápida
-- ✅ **Manejo de Errores**
+-  **Manejo de Errores**
   - Validación de tipos de archivo
   - Mensajes de error descriptivos
   - Rollback en caso de fallo
@@ -280,7 +280,7 @@ Plataforma web **Full Stack (MERN)** profesional para la gestión y visualizaci�
 
 ---
 
-### 🗄️ **Modelos de Base de Datos**
+###  **Modelos de Base de Datos**
 
 #### **User** (Administradores)
 ```javascript
@@ -351,7 +351,7 @@ Plataforma web **Full Stack (MERN)** profesional para la gestión y visualizaci�
 
 ---
 
-### 🛣️ **API REST Endpoints**
+###  **API REST Endpoints**
 
 #### **Autenticación** (`/api/auth`)
 - `POST /register` - Registro de administrador
@@ -386,7 +386,7 @@ Plataforma web **Full Stack (MERN)** profesional para la gestión y visualizaci�
 
 ---
 
-## 📁 Estructura del Proyecto
+##  Estructura del Proyecto
 
 ```
 paola-deco-project/
@@ -446,7 +446,7 @@ paola-deco-project/
 
 ---
 
-## 🛠️ Instalación y Configuración
+##  Instalación y Configuración
 
 ### **Prerrequisitos**
 - Node.js v18 o superior
@@ -522,60 +522,60 @@ Luego iniciar sesión en `/login` con esas credenciales.
 
 ---
 
-## 🎨 Características de UX/UI
+##  Características de UX/UI
 
 ### **Notificaciones y Feedback**
-- ✅ **React Hot Toast** para notificaciones no intrusivas
+-  **React Hot Toast** para notificaciones no intrusivas
   - Confirmaciones de acciones exitosas
   - Alertas de errores descriptivas
   - Indicadores de carga (uploading, saving)
   - Auto-dismiss después de 3-5 segundos
-- ✅ **SweetAlert2** para confirmaciones críticas
+-  **SweetAlert2** para confirmaciones críticas
   - Confirmación antes de eliminar servicios
   - Diseño personalizado con colores de marca
   - Botones "Confirmar" y "Cancelar"
 
 ### **Diseño Responsivo**
-- ✅ **Mobile-First Approach**
+-  **Mobile-First Approach**
   - Sidebar colapsable en móvil
   - Menú hamburguesa con overlay
   - Tablas con scroll horizontal
   - Grids adaptables (1/2/3 columnas)
-- ✅ **Breakpoints de Tailwind**
+-  **Breakpoints de Tailwind**
   - `sm:` 640px
   - `md:` 768px
   - `lg:` 1024px
   - `xl:` 1280px
 
 ### **Animaciones y Transiciones**
-- ✅ Hover effects en tarjetas y botones
-- ✅ Transiciones suaves de color y escala
-- ✅ Animaciones de entrada/salida de modales
-- ✅ Efectos de carga (spinners, skeletons)
-- ✅ Carrusel con fade transitions
+-  Hover effects en tarjetas y botones
+-  Transiciones suaves de color y escala
+-  Animaciones de entrada/salida de modales
+-  Efectos de carga (spinners, skeletons)
+-  Carrusel con fade transitions
 
 ### **Accesibilidad**
-- ✅ Iconos con texto descriptivo
-- ✅ Botones con estados hover/active/disabled
-- ✅ Contraste de colores adecuado
-- ✅ Formularios con labels claros
+-  Iconos con texto descriptivo
+-  Botones con estados hover/active/disabled
+-  Contraste de colores adecuado
+-  Formularios con labels claros
 
 ---
 
-## 🔒 Seguridad Implementada
+##  Seguridad Implementada
 
-- ✅ **Autenticación JWT** con cookies httpOnly
-- ✅ **Encriptación de contraseñas** con bcrypt (10 rounds)
-- ✅ **Validación de datos** en frontend y backend
-- ✅ **Protección de rutas** con middleware
-- ✅ **CORS configurado** para origen específico
-- ✅ **Prevención de duplicados** en base de datos
-- ✅ **Sanitización de inputs** (trim, validaciones)
-- ✅ **Manejo seguro de archivos** (limpieza de temporales)
+-  **Autenticación JWT** con cookies httpOnly
+-  **Encriptación de contraseñas** con bcrypt (10 rounds)
+-  **Validación de datos** en frontend y backend
+-  **Protección de rutas** con middleware
+-  **CORS configurado** para origen específico
+-  **Prevención de duplicados** en base de datos
+-  **Sanitización de inputs** (trim, validaciones)
+-  **Manejo seguro de archivos** (limpieza de temporales)
 
 ---
 
-## 🎯 Próximos Pasos (Roadmap)
+##  Próximos Pasos (Roadmap)
 
 ### **Funcionalidades**
 - [ ] Sistema de roles (Super Admin, Editor, Viewer)
@@ -617,71 +617,71 @@ Luego iniciar sesión en `/login` con esas credenciales.
 
 ---
 
-## 📊 Tecnologías y Patrones Aplicados
+##  Tecnologías y Patrones Aplicados
 
 ### **Arquitectura**
-- ✅ **Arquitectura MVC** en el backend
-- ✅ **Component-Based Architecture** en React
-- ✅ **RESTful API** con convenciones estándar
-- ✅ **Separation of Concerns** (rutas, modelos, controladores)
+-  **Arquitectura MVC** en el backend
+-  **Component-Based Architecture** en React
+-  **RESTful API** con convenciones estándar
+-  **Separation of Concerns** (rutas, modelos, controladores)
 
 ### **Patrones de Diseño**
-- ✅ **Context API** para estado global
-- ✅ **Higher-Order Components** (ProtectedRoute)
-- ✅ **Custom Hooks** potenciales
-- ✅ **Compound Components** (Modal, Sidebar)
-- ✅ **Render Props** en algunos casos
+-  **Context API** para estado global
+-  **Higher-Order Components** (ProtectedRoute)
+-  **Custom Hooks** potenciales
+-  **Compound Components** (Modal, Sidebar)
+-  **Render Props** en algunos casos
 
 ### **Best Practices**
-- ✅ **DRY (Don't Repeat Yourself)** - Funciones reutilizables
-- ✅ **KISS (Keep It Simple, Stupid)** - Código legible
-- ✅ **Validación en ambos lados** (cliente y servidor)
-- ✅ **Manejo de errores consistente**
-- ✅ **Nomenclatura descriptiva** de variables y funciones
-- ✅ **Comentarios en código complejo**
-- ✅ **Organización modular** de archivos
+-  **DRY (Don't Repeat Yourself)** - Funciones reutilizables
+-  **KISS (Keep It Simple, Stupid)** - Código legible
+-  **Validación en ambos lados** (cliente y servidor)
+-  **Manejo de errores consistente**
+-  **Nomenclatura descriptiva** de variables y funciones
+-  **Comentarios en código complejo**
+-  **Organización modular** de archivos
 
 ---
 
-## 👨‍💻 Aprendizajes del Proyecto
+##  Aprendizajes del Proyecto
 
 Este proyecto fue desarrollado con fines educativos para dominar:
 
 ### **Frontend**
-- ✅ React 19 con hooks modernos
-- ✅ Gestión de estado global con Context API
-- ✅ Rutas protegidas y navegación programática
-- ✅ Formularios controlados y validación
-- ✅ Upload de archivos con preview
-- ✅ Consumo de APIs con Axios
-- ✅ Diseño responsivo con Tailwind CSS
-- ✅ Notificaciones y modales personalizados
-- ✅ Optimización de renders y performance
+-  React 19 con hooks modernos
+-  Gestión de estado global con Context API
+-  Rutas protegidas y navegación programática
+-  Formularios controlados y validación
+-  Upload de archivos con preview
+-  Consumo de APIs con Axios
+-  Diseño responsivo con Tailwind CSS
+-  Notificaciones y modales personalizados
+-  Optimización de renders y performance
 
 ### **Backend**
-- ✅ Servidor Express con arquitectura escalable
-- ✅ Modelado de datos con Mongoose
-- ✅ Autenticación JWT y manejo de cookies
-- ✅ Upload de archivos con Multer
-- ✅ Integración con servicios cloud (Cloudinary)
-- ✅ Validación y sanitización de datos
-- ✅ Manejo de errores y logging
-- ✅ Queries complejas con filtros y paginación
-- ✅ Relaciones entre modelos (referencias)
+-  Servidor Express con arquitectura escalable
+-  Modelado de datos con Mongoose
+-  Autenticación JWT y manejo de cookies
+-  Upload de archivos con Multer
+-  Integración con servicios cloud (Cloudinary)
+-  Validación y sanitización de datos
+-  Manejo de errores y logging
+-  Queries complejas con filtros y paginación
+-  Relaciones entre modelos (referencias)
 
 ### **Full Stack**
-- ✅ Comunicación cliente-servidor
-- ✅ Flujo completo de autenticación
-- ✅ CRUD operations end-to-end
-- ✅ Gestión de estado sincronizado
-- ✅ Debugging y testing
-- ✅ Git y control de versiones
-- ✅ Variables de entorno y configuración
-- ✅ Deployment considerations
+-  Comunicación cliente-servidor
+-  Flujo completo de autenticación
+-  CRUD operations end-to-end
+-  Gestión de estado sincronizado
+-  Debugging y testing
+-  Git y control de versiones
+-  Variables de entorno y configuración
+-  Deployment considerations
 
 ---
 
-## 📝 Notas Técnicas
+##  Notas Técnicas
 
 ### **Convenciones de Código**
 - Nombres de categorías siempre en **MAYÚSCULAS**
@@ -706,7 +706,7 @@ Este proyecto fue desarrollado con fines educativos para dominar:
 
 ---
 
-## 🤝 Contribuciones
+##  Contribuciones
 
 Este es un proyecto educativo personal. Si deseas contribuir:
 
@@ -724,16 +724,16 @@ Este proyecto es de uso **educativo** y personal.
 
 ---
 
-## 📧 Contacto
+##  Contacto
 
 Para consultas sobre el proyecto:
-- **Desarrollador**: [Tu Nombre]
-- **Email**: [tu-email@ejemplo.com]
-- **GitHub**: [tu-usuario-github]
+- **Desarrollador**: Tello Bustamante Leonardo Daniel
+- **Email**: ldtb2001@gmail.com
+- **GitHub**: RagnarTB-github
 
 ---
 
-## 🙏 Agradecimientos
+##  Agradecimientos
 
 - **MongoDB** por la base de datos en la nube
 - **Cloudinary** por el almacenamiento de imágenes
@@ -744,4 +744,4 @@ Para consultas sobre el proyecto:
 
 ---
 
-**⭐ Si este proyecto te fue útil, considera darle una estrella en GitHub!**
+** Si este proyecto te fue útil, considera darle una estrella en GitHub!**
