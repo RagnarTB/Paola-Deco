@@ -19,7 +19,8 @@ export function CatalogPage() {
                     getCategories(),
                     getConfig()
                 ]);
-                setCategories(catsRes.data.filter(c => c.isActive));
+                const catsData = Array.isArray(catsRes.data) ? catsRes.data : [];
+                setCategories(catsData.filter(c => c.isActive));
                 // Guardamos el número si existe
                 setWhatsappNumber(configRes.data.whatsapp || "");
             } catch (error) {
@@ -40,7 +41,7 @@ export function CatalogPage() {
                     maxPrice: priceRange.max,
                     isActive: true
                 });
-                setServices(res.data.services);
+                setServices(Array.isArray(res.data?.services) ? res.data.services : []);
             } catch (error) {
                 console.error(error);
             } finally {

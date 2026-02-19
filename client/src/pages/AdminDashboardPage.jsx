@@ -35,8 +35,8 @@ export function AdminDashboardPage() {
                 limit: 5
             });
 
-            setServices(res.data.services);
-            setTotalPages(res.data.totalPages);
+            setServices(Array.isArray(res.data?.services) ? res.data.services : []);
+            setTotalPages(res.data?.totalPages || 1);
         } catch (error) {
             console.error("Error cargando servicios:", error);
             toast.error("Error cargando servicios");

@@ -17,7 +17,7 @@ export function UsersPage() {
     const loadUsers = async () => {
         try {
             const res = await getUsers();
-            setUsers(res.data);
+            setUsers(Array.isArray(res.data) ? res.data : []);
         } catch (error) {
             console.error(error);
             if (error.response?.status === 401) {
