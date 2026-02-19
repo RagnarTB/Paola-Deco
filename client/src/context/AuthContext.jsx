@@ -30,7 +30,15 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(true);
             setUser(res.data);
         } catch (error) {
-            setErrors(error.response?.data || ["Error al ingresar"]);
+            const data = error.response?.data;
+            // Normalizar siempre a array: puede venir como objeto {message:...}, array, o string
+            if (Array.isArray(data)) {
+                setErrors(data);
+            } else if (data?.message) {
+                setErrors([data.message]);
+            } else {
+                setErrors(["Email o contraseña incorrectos"]);
+            }
         }
     };
 
@@ -95,6 +103,7 @@ export const AuthProvider = ({ children }) => {
                 user,
                 isAuthenticated,
                 errors,
+                setErrors,  // <--- exportar para que login pueda limpiarlos
                 loading, // <--- EXPORTAMOS LOADING
             }}
         >

@@ -4,26 +4,39 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export function LoginPage() {
-    const { signin, isAuthenticated, errors } = useAuth(); // SOLO signin
+    const { signin, isAuthenticated, errors, setErrors } = useAuth();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
     // Si ya está autenticado, ir directo al admin
     useEffect(() => {
         if (isAuthenticated) navigate("/admin");
     }, [isAuthenticated, navigate]);
 
-    const handleSubmit = (e) => {
+    // Auto-limpiar errores después de 4 segundos
+    useEffect(() => {
+        if (Array.isArray(errors) && errors.length > 0) {
+            const timer = setTimeout(() => {
+                if (typeof setErrors === 'function') setErrors([]);
+            }, 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [errors]);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        signin({ email, password });
+        setLoading(true);
+        await signin({ email, password });
+        setLoading(false);
     };
 
     return (
         <div className="font-display bg-[#fdf2f6] min-h-screen flex items-center justify-center relative overflow-hidden">
 
-            {/* Decoración suave */}
+            {/* Decoración */}
             <div className="absolute w-[500px] h-[500px] bg-primary/20 -top-20 -left-20 rounded-full blur-3xl opacity-50"></div>
             <div className="absolute w-[600px] h-[600px] bg-pink-300/20 -bottom-32 -right-32 rounded-full blur-3xl opacity-50"></div>
 
@@ -43,15 +56,20 @@ export function LoginPage() {
                         </p>
                     </div>
 
-                    {/* Errores */}
-                    {errors.map((error, i) => (
-                        <div
-                            key={i}
-                            className="bg-red-500 p-2 text-white text-center rounded-lg text-sm font-bold"
-                        >
-                            {error}
+                    {/* Errores - siempre seguros */}
+                    {Array.isArray(errors) && errors.length > 0 && (
+                        <div className="flex flex-col gap-2">
+                            {errors.map((error, i) => (
+                                <div
+                                    key={i}
+                                    className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">error</span>
+                                    {error}
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    )}
 
                     {/* Formulario */}
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -76,9 +94,15 @@ export function LoginPage() {
 
                         <button
                             type="submit"
-                            className="h-12 rounded-xl bg-primary text-white font-bold hover:bg-primary-hover shadow-lg mt-2 transition-all"
+                            disabled={loading}
+                            className="h-12 rounded-xl bg-primary text-white font-bold hover:bg-primary-hover shadow-lg mt-2 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
                         >
-                            Ingresar
+                            {loading ? (
+                                <>
+                                    <span className="animate-spin material-symbols-outlined text-[20px]">progress_activity</span>
+                                    Verificando...
+                                </>
+                            ) : 'Ingresar'}
                         </button>
 
                     </form>
