@@ -16,7 +16,8 @@ export function HomePage() {
                 setConfig(confRes.data);
 
                 const catRes = await getCategories();
-                setCategories(catRes.data.filter(c => c.isActive));
+                const catData = Array.isArray(catRes.data) ? catRes.data : [];
+                setCategories(catData.filter(c => c.isActive));
             } catch (error) {
                 console.error("Error cargando datos", error);
             }

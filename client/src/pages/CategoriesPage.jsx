@@ -29,7 +29,7 @@ export function CategoriesPage() {
     const loadCategories = async () => {
         try {
             const res = await getCategories();
-            setCategories(res.data);
+            setCategories(Array.isArray(res.data) ? res.data : []);
         } catch (error) {
             console.error("Error cargando categorías:", error);
             toast.error("Error cargando categorías");
